@@ -14,6 +14,7 @@ namespace ColoursTest.Web.Controllers
         public PeopleController(IPersonRepository personRepository)
         {
             PersonRepository = personRepository;
+            //testing commit
         }
 
         [HttpGet]
