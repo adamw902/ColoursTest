@@ -1,4 +1,5 @@
-﻿using ColoursTest.Data.Interfaces;
+﻿using ColoursTest.Data.Factories;
+using ColoursTest.Data.Interfaces;
 using ColoursTest.Data.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -27,8 +28,14 @@ namespace ColoursTest.Web
         {
             // Add framework services.
             services.AddMvc();
+
+            services.Configure<ConnectionFactory>(Configuration.GetSection("DatabaseValues"));
+            services.AddSingleton<ConnectionFactory>();
+
             services.AddTransient<IPersonRepository, PersonRepository>();
             services.AddTransient<IColourRepository, ColourRepository>();
+
+            services.AddSingleton<IConfiguration>(Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -37,7 +44,7 @@ namespace ColoursTest.Web
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
 
-            AutoMapperBuilder.CreateMaps();
+            AutoMapper.CreateMaps();
 
             app.UseMvc();
         }

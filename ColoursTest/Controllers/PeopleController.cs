@@ -10,7 +10,7 @@ namespace ColoursTest.Web.Controllers
     public class PeopleController : Controller
     {
         private IPersonRepository PersonRepository { get; }
-
+        
         public PeopleController(IPersonRepository personRepository)
         {
             PersonRepository = personRepository;
@@ -37,10 +37,10 @@ namespace ColoursTest.Web.Controllers
             return Ok(personResult);
         }
 
-        // POST api/people
         [HttpPost]
-        public void Post([FromBody]PersonDto person)
+        public IActionResult Post([FromBody]PersonDto person)
         {
+            return NotFound();
         }
 
         [HttpPut("{id}")]
@@ -54,10 +54,10 @@ namespace ColoursTest.Web.Controllers
             return Ok(person);
         }
 
-        // DELETE api/people/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public IActionResult Delete(int id)
         {
+            return NotFound();
         }
     }
 }

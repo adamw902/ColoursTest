@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using ColoursTest.Data.Constants;
 using ColoursTest.Data.DTOs;
+using ColoursTest.Data.Factories;
 using ColoursTest.Data.Interfaces;
 using ColoursTest.Data.Models;
 using Dapper;
@@ -13,9 +14,16 @@ namespace ColoursTest.Data.Repositories
 {
     public class PersonRepository : IPersonRepository
     {
+        private ConnectionFactory ConnectionFactory { get; }
+
+        public PersonRepository(ConnectionFactory connectionFactory)
+        {
+            ConnectionFactory = connectionFactory;
+        }
+
         public IEnumerable<Person> GetAll()
         {
-            using (IDbConnection connection = new SqlConnection(SystemVariables.ConnectionString))
+            using (IDbConnection connection = ConnectionFactory.GetNewConnection())
             {
                 var results = connection
                     .Query<Person, Colour, Person>(Queries.PersonQueries.SelectPeopleAndColours,
@@ -38,7 +46,7 @@ namespace ColoursTest.Data.Repositories
 
         public Person GetById(int personId)
         {
-            using (IDbConnection connection = new SqlConnection(SystemVariables.ConnectionString))
+            using (IDbConnection connection = ConnectionFactory.GetNewConnection())
             {
                 var person = connection.Query<Person>(Queries.PersonQueries.SelectPerson, new {PersonId = personId.ToString()}).SingleOrDefault();
                 if (person == null)
@@ -59,7 +67,7 @@ namespace ColoursTest.Data.Repositories
 
         public Person Update(int personId, UpdatePersonDto updatePersonDto)
         {
-            using (IDbConnection connection = new SqlConnection(SystemVariables.ConnectionString))
+            using (IDbConnection connection = ConnectionFactory.GetNewConnection())
             {
                 Person person = GetById(personId);
 
@@ -73,9 +81,17 @@ namespace ColoursTest.Data.Repositories
                 {
                     try
                     {
-                        connection.Execute(Queries.PersonQueries.UpdatePersonDetails, new {updatePersonDto.IsEnabled, updatePersonDto.IsAuthorised, updatePersonDto.IsValid, personId}, transaction);
-                        connection.Execute(Queries.PersonQueries.DeletePersonColours, new { personId }, transaction);
-                        connection.Execute(Queries.PersonQueries.InsertPersonColours(updatePersonDto.FavouriteColours, personId), null, transaction);
+                        connection.Execute(Queries.PersonQueries.UpdatePersonDetails,
+                            new
+                            {
+                                updatePersonDto.IsEnabled,
+                                updatePersonDto.IsAuthorised,
+                                updatePersonDto.IsValid,
+                                personId
+                            }, transaction);
+                        connection.Execute(Queries.PersonQueries.DeletePersonColours, new {personId}, transaction);
+                        connection.Execute(Queries.PersonQueries.InsertPersonColours(updatePersonDto.FavouriteColours, personId), null,transaction);
+
                         transaction.Commit();
                         connection.Close();
                     }

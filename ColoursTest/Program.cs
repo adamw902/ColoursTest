@@ -21,8 +21,6 @@ namespace ColoursTest.Web
                 .Build();
 
             host.Run();
-
-            
         }
     }
 }
