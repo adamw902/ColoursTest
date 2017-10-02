@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace ColoursTest.Data.DTOs
+namespace ColoursTest.Infrastructure.DTOs
 {
-    public class UpdatePersonDto
+    public class UpdatePerson
     {
         public bool IsAuthorised { get; set; }
         public bool IsValid { get; set; }

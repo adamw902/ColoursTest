@@ -1,6 +1,9 @@
-﻿using ColoursTest.Data.Factories;
-using ColoursTest.Data.Interfaces;
-using ColoursTest.Data.Repositories;
+﻿using ColoursTest.AppServices.Interfaces;
+using ColoursTest.AppServices.Services;
+using ColoursTest.Infrastructure.Factories;
+using ColoursTest.Domain.Interfaces;
+using ColoursTest.Infrastructure.Interfaces;
+using ColoursTest.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -29,13 +32,12 @@ namespace ColoursTest.Web
             // Add framework services.
             services.AddMvc();
 
-            services.Configure<ConnectionFactory>(Configuration.GetSection("DatabaseValues"));
-            services.AddSingleton<ConnectionFactory>();
+            services.AddSingleton<IConfiguration>(Configuration);
+            services.AddSingleton<IConnectionFactory, SqlConnectionFactory>();
 
             services.AddTransient<IPersonRepository, PersonRepository>();
             services.AddTransient<IColourRepository, ColourRepository>();
-
-            services.AddSingleton<IConfiguration>(Configuration);
+            services.AddTransient<IPersonService, PersonService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -44,9 +46,14 @@ namespace ColoursTest.Web
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
 
-            AutoMapper.CreateMaps();
-
             app.UseMvc();
         }
     }
 }
+
+
+//todo: 
+//Enable reshaper, with coding standards(.settings)
+//Add Nlog(via ILogger interface)
+//Customise git(gitconfig / aliases)
+//Presentation on SOLID principles for (next Monday 2pm)

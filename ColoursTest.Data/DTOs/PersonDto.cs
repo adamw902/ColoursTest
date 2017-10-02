@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using ColoursTest.Data.Models;
+using ColoursTest.Domain.Models;
 
-namespace ColoursTest.Data.DTOs
+namespace ColoursTest.Infrastructure.DTOs
 {
     public class PersonDto
     {

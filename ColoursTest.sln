@@ -3,9 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26730.16
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ColoursTest.Web", "ColoursTest\ColoursTest.Web.csproj", "{CB9E22C2-1B16-414F-9843-BF831FD89CAA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ColoursTest.Web", "ColoursTest\ColoursTest.Web.csproj", "{CB9E22C2-1B16-414F-9843-BF831FD89CAA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ColoursTest.Data", "ColoursTest.Data\ColoursTest.Data.csproj", "{8ABCCFE1-72A3-4109-BFC2-1717ECF5A563}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ColoursTest.Infrastructure", "ColoursTest.Data\ColoursTest.Infrastructure.csproj", "{8ABCCFE1-72A3-4109-BFC2-1717ECF5A563}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ColoursTest.Domain", "ColoursTest.Domain\ColoursTest.Domain.csproj", "{B72AA7AE-CD0D-42AF-A061-71D528BD49EA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ColoursTest.AppServices", "TechTest.AppServices\ColoursTest.AppServices.csproj", "{CDFD84DB-8B95-4BBE-BFE4-2D312E212E99}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +25,14 @@ Global
 		{8ABCCFE1-72A3-4109-BFC2-1717ECF5A563}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8ABCCFE1-72A3-4109-BFC2-1717ECF5A563}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8ABCCFE1-72A3-4109-BFC2-1717ECF5A563}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B72AA7AE-CD0D-42AF-A061-71D528BD49EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B72AA7AE-CD0D-42AF-A061-71D528BD49EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B72AA7AE-CD0D-42AF-A061-71D528BD49EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B72AA7AE-CD0D-42AF-A061-71D528BD49EA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CDFD84DB-8B95-4BBE-BFE4-2D312E212E99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CDFD84DB-8B95-4BBE-BFE4-2D312E212E99}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CDFD84DB-8B95-4BBE-BFE4-2D312E212E99}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CDFD84DB-8B95-4BBE-BFE4-2D312E212E99}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

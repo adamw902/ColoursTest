@@ -1,6 +1,6 @@
-﻿using ColoursTest.Data.Models;
+﻿using ColoursTest.Domain.Models;
 
-namespace ColoursTest.Data.Interfaces
+namespace ColoursTest.Domain.Interfaces
 {
     public interface IColourRepository : IBaseRepository<Colour, int>
     {

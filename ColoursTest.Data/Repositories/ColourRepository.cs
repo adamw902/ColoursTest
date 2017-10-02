@@ -2,37 +2,36 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using ColoursTest.Data.Constants;
-using ColoursTest.Data.Factories;
-using ColoursTest.Data.Interfaces;
-using ColoursTest.Data.Models;
+using ColoursTest.Domain.Interfaces;
+using ColoursTest.Domain.Models;
+using ColoursTest.Infrastructure.Interfaces;
 using Dapper;
 
-namespace ColoursTest.Data.Repositories
+namespace ColoursTest.Infrastructure.Repositories
 {
     public class ColourRepository : IColourRepository
     {
-        public ConnectionFactory ConnectionFactory { get; }
+        public IConnectionFactory ConnectionFactory { get; }
 
-        public ColourRepository(ConnectionFactory connectionFactory)
+        public ColourRepository(IConnectionFactory connectionFactory)
         {
             ConnectionFactory = connectionFactory;
         }
 
         public IEnumerable<Colour> GetAll()
         {
-            using (IDbConnection connection = ConnectionFactory.GetNewConnection())
+            using (IDbConnection connection = ConnectionFactory.GetConnection())
             {
-                var colours = connection.Query<Colour>(Queries.ColourQueries.SelectColours);
+                var colours = connection.Query<Colour>("SELECT * FROM [Colours];");
                 return colours;
             }
         }
 
         public Colour GetById(int colourId)
         {
-            using (IDbConnection connection = ConnectionFactory.GetNewConnection())
+            using (IDbConnection connection = ConnectionFactory.GetConnection())
             {
-                var colour = connection.Query<Colour>(Queries.ColourQueries.SelectColour, new {ColourId = colourId});
+                var colour = connection.Query<Colour>("SELECT * FROM [Colours] WHERE ColourId = @ColourId;", new {ColourId = colourId});
                 return colour.SingleOrDefault();
             }
         }
@@ -42,7 +41,7 @@ namespace ColoursTest.Data.Repositories
             throw new NotImplementedException();
         }
 
-        public void Update(Colour item)
+        public Colour Update(Colour item)
         {
             throw new NotImplementedException();
         }

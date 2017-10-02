@@ -1,4 +1,5 @@
-﻿using ColoursTest.Data.Interfaces;
+﻿using ColoursTest.Domain.Interfaces;
+using ColoursTest.Infrastructure.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ColoursTest.Web.Controllers
@@ -17,14 +18,20 @@ namespace ColoursTest.Web.Controllers
         public IActionResult Get()
         {
             var colours = ColourRepository.GetAll();
-            return Ok(colours);
+            var coloursResult = colours.ToColoursDto();
+            return Ok(coloursResult);
         }
 
         [HttpGet("{id}")]
-        public IActionResult Get(int colourId)
+        public IActionResult Get(int id)
         {
-            var colour = ColourRepository.GetById(colourId);
-            return colour != null ? (IActionResult) Ok(colour) : NotFound();
+            var colour = ColourRepository.GetById(id);
+            if (colour == null)
+            {
+                return NotFound();
+            }
+            var colourResult = colour.ToColourDto();
+            return Ok(colourResult);
         }
 
         [HttpPost]

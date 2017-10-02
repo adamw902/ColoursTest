@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using AutoMapper;
-using ColoursTest.Data.DTOs;
-using ColoursTest.Data.Interfaces;
+﻿using ColoursTest.AppServices.Interfaces;
+using ColoursTest.Domain.Interfaces;
+using ColoursTest.Infrastructure.DTOs;
+using ColoursTest.Infrastructure.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ColoursTest.Web.Controllers
@@ -10,17 +10,19 @@ namespace ColoursTest.Web.Controllers
     public class PeopleController : Controller
     {
         private IPersonRepository PersonRepository { get; }
+        private IPersonService PersonService { get; }
         
-        public PeopleController(IPersonRepository personRepository)
+        public PeopleController(IPersonRepository personRepository, IPersonService personService)
         {
             PersonRepository = personRepository;
+            PersonService = personService;
         }
 
         [HttpGet]
         public IActionResult Get()
         {
             var people = PersonRepository.GetAll();
-            var peopleResult = Mapper.Map<IEnumerable<PersonDto>>(people);
+            var peopleResult = people.ToPersonDto();
             return Ok(peopleResult);
         }
 
@@ -33,7 +35,7 @@ namespace ColoursTest.Web.Controllers
             {
                 return NotFound();
             }
-            var personResult = Mapper.Map<PersonDto>(person);
+            var personResult = person.ToPersonDto();
             return Ok(personResult);
         }
 
@@ -44,14 +46,15 @@ namespace ColoursTest.Web.Controllers
         }
 
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody]UpdatePersonDto updatePersonDto)
+        public IActionResult Put(int id, [FromBody]UpdatePerson updatePerson)
         {
-            var person = PersonRepository.Update(id, updatePersonDto);
+            var person = this.PersonService.UpdatePerson(id, updatePerson);
             if (person == null)
             {
                 return NotFound();
             }
-            return Ok(person);
+            var personResult = person.ToPersonDto();
+            return Ok(personResult);
         }
 
         [HttpDelete("{id}")]

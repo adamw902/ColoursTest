@@ -1,8 +1,8 @@
-﻿namespace ColoursTest.Data.DTOs
+﻿namespace ColoursTest.Infrastructure.DTOs
 {
     public class PersonDetailsDto
     {
-        public int PersonId { get; set; }
+        public int Id { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public bool IsAuthorised { get; set; }

@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ColoursTest.Data\ColoursTest.Infrastructure.csproj" />
+    <ProjectReference Include="..\ColoursTest.Domain\ColoursTest.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

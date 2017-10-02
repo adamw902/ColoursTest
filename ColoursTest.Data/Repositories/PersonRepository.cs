@@ -1,32 +1,35 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Diagnostics;
 using System.Linq;
-using ColoursTest.Data.Constants;
-using ColoursTest.Data.DTOs;
-using ColoursTest.Data.Factories;
-using ColoursTest.Data.Interfaces;
-using ColoursTest.Data.Models;
+using ColoursTest.Domain.Interfaces;
+using ColoursTest.Domain.Models;
+using ColoursTest.Infrastructure.Interfaces;
 using Dapper;
 
-namespace ColoursTest.Data.Repositories
+namespace ColoursTest.Infrastructure.Repositories
 {
     public class PersonRepository : IPersonRepository
     {
-        private ConnectionFactory ConnectionFactory { get; }
+        private IConnectionFactory ConnectionFactory { get; }
 
-        public PersonRepository(ConnectionFactory connectionFactory)
+        public PersonRepository(IConnectionFactory connectionFactory)
         {
             ConnectionFactory = connectionFactory;
         }
 
         public IEnumerable<Person> GetAll()
         {
-            using (IDbConnection connection = ConnectionFactory.GetNewConnection())
+            using (var connection = ConnectionFactory.GetConnection())
             {
+                string selectPeopleAndColours = @"SELECT P.*, C.* FROM [People] P
+                                                INNER JOIN [FavouriteColours] FC
+                                                ON P.PersonId = FC.PersonId
+                                                INNER JOIN [Colours] C
+                                                ON FC.ColourId = C.ColourId;";
                 var results = connection
-                    .Query<Person, Colour, Person>(Queries.PersonQueries.SelectPeopleAndColours,
+                    .Query<Person, Colour, Person>(selectPeopleAndColours,
                     (person, colour) =>
                     {
                         person.FavouriteColours = person.FavouriteColours ?? new List<Colour>();
@@ -46,15 +49,17 @@ namespace ColoursTest.Data.Repositories
 
         public Person GetById(int personId)
         {
-            using (IDbConnection connection = ConnectionFactory.GetNewConnection())
+            using (IDbConnection connection = ConnectionFactory.GetConnection())
             {
-                var person = connection.Query<Person>(Queries.PersonQueries.SelectPerson, new {PersonId = personId.ToString()}).SingleOrDefault();
+                var selectPerson = "SELECT * FROM [People] WHERE PersonId = @PersonId;";
+                var person = connection.Query<Person>(selectPerson, new {PersonId = personId.ToString()}).SingleOrDefault();
                 if (person == null)
                 {
                     return null;
                 }
 
-                var colours = connection.Query<Colour>(Queries.PersonQueries.SelectPersonColours, new {PersonId = personId.ToString()}).ToList();
+                var selectPersonColours = "SELECT C.* FROM [Colours] C INNER JOIN [FavouriteColours] FC ON C.ColourId = FC.ColourId WHERE FC.PersonId = @PersonId;";
+                var colours = connection.Query<Colour>(selectPersonColours, new {PersonId = personId.ToString()}).ToList();
                 person.FavouriteColours = colours;
                 return person;
             }
@@ -65,44 +70,48 @@ namespace ColoursTest.Data.Repositories
             throw new System.NotImplementedException();
         }
 
-        public Person Update(int personId, UpdatePersonDto updatePersonDto)
+
+        public Person Update(Person person)
         {
-            using (IDbConnection connection = ConnectionFactory.GetNewConnection())
+            if (person == null)
             {
-                Person person = GetById(personId);
+                throw new ArgumentNullException(nameof(person), "Cant update null person");
+            }
 
-                if (person == null)
-                {
-                    return null;
-                }
-
+            using (IDbConnection connection = this.ConnectionFactory.GetConnection())
+            {
                 connection.Open();
                 using (var transaction = connection.BeginTransaction())
                 {
                     try
                     {
-                        connection.Execute(Queries.PersonQueries.UpdatePersonDetails,
+                        var updatePersonDetails = "UPDATE [People] SET IsEnabled = @IsEnabled, IsAuthorised = @IsAuthorised, IsValid = @IsValid WHERE PersonId = @PersonId;";
+                        connection.Execute(updatePersonDetails,
                             new
                             {
-                                updatePersonDto.IsEnabled,
-                                updatePersonDto.IsAuthorised,
-                                updatePersonDto.IsValid,
-                                personId
+                                person.IsEnabled,
+                                person.IsAuthorised,
+                                person.IsValid,
+                                person.PersonId
                             }, transaction);
-                        connection.Execute(Queries.PersonQueries.DeletePersonColours, new {personId}, transaction);
-                        connection.Execute(Queries.PersonQueries.InsertPersonColours(updatePersonDto.FavouriteColours, personId), null,transaction);
+                        var deletePersonColours = "DELETE FROM [FavouriteColours] WHERE PersonId = @PersonId;";
+                        connection.Execute(deletePersonColours, new { person.PersonId }, transaction);
+
+                        var insertPersonColour = "INSERT INTO [FavouriteColours] (PersonId, ColourId) VALUES (@PersonId, @ColourId);";
+                        foreach (var favouriteColour in person.FavouriteColours)
+                        {
+                            connection.Execute(insertPersonColour, new { person.PersonId, favouriteColour.ColourId }, transaction);
+                        }
 
                         transaction.Commit();
-                        connection.Close();
                     }
                     catch (SqlException ex)
                     {
-                        Debug.WriteLine(ex.Message);
-                        transaction.Rollback();
-                        return null;
+                        //todo: log this
+                        throw new Exception("Attempted to update person who does not exist.");
                     }
                 }
-                var updatedPerson = GetById(personId);
+                var updatedPerson = GetById(person.PersonId);
                 return updatedPerson;
             }
         }
