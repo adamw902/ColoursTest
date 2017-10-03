@@ -7,49 +7,49 @@ namespace ColoursTest.Web.Controllers
     [Route("api/[controller]")]
     public class ColoursController : Controller
     {
-        private IColourRepository ColourRepository { get; }
-
         public ColoursController(IColourRepository colourRepository)
         {
-            ColourRepository = colourRepository;
+            this.ColourRepository = colourRepository;
         }
+
+        private IColourRepository ColourRepository { get; }
 
         [HttpGet]
         public IActionResult Get()
         {
-            var colours = ColourRepository.GetAll();
+            var colours = this.ColourRepository.GetAll();
             var coloursResult = colours.ToColoursDto();
-            return Ok(coloursResult);
+            return this.Ok(coloursResult);
         }
 
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
-            var colour = ColourRepository.GetById(id);
+            var colour = this.ColourRepository.GetById(id);
             if (colour == null)
             {
-                return NotFound();
+                return this.NotFound();
             }
             var colourResult = colour.ToColourDto();
-            return Ok(colourResult);
+            return this.Ok(colourResult);
         }
 
         [HttpPost]
         public IActionResult Post([FromBody]string value)
         {
-            return NotFound();
+            return this.NotFound();
         }
 
         [HttpPut("{id}")]
         public IActionResult Put(int id, [FromBody]string value)
         {
-            return NotFound();
+            return this.NotFound();
         }
 
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            return NotFound();
+            return this.NotFound();
         }
     }
 }

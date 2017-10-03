@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.26730.16
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ColoursTest.Web", "ColoursTest\ColoursTest.Web.csproj", "{CB9E22C2-1B16-414F-9843-BF831FD89CAA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ColoursTest.Infrastructure", "ColoursTest.Data\ColoursTest.Infrastructure.csproj", "{8ABCCFE1-72A3-4109-BFC2-1717ECF5A563}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ColoursTest.Infrastructure", "ColoursTest.Infrastructure\ColoursTest.Infrastructure.csproj", "{8ABCCFE1-72A3-4109-BFC2-1717ECF5A563}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ColoursTest.Domain", "ColoursTest.Domain\ColoursTest.Domain.csproj", "{B72AA7AE-CD0D-42AF-A061-71D528BD49EA}"
 EndProject

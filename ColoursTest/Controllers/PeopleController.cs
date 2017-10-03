@@ -1,66 +1,80 @@
-﻿using ColoursTest.AppServices.Interfaces;
+﻿using System;
+using ColoursTest.AppServices.Interfaces;
 using ColoursTest.Domain.Interfaces;
 using ColoursTest.Infrastructure.DTOs;
 using ColoursTest.Infrastructure.Extensions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace ColoursTest.Web.Controllers
 {
     [Route("api/[controller]")]
     public class PeopleController : Controller
     {
+        public PeopleController(IPersonRepository personRepository, IPersonService personService, ILogger<PeopleController> logger)
+        {
+            this.PersonRepository = personRepository;
+            this.PersonService = personService;
+            this.Logger = logger;
+        }
+
+        private ILogger<PeopleController> Logger { get; }
         private IPersonRepository PersonRepository { get; }
         private IPersonService PersonService { get; }
-        
-        public PeopleController(IPersonRepository personRepository, IPersonService personService)
-        {
-            PersonRepository = personRepository;
-            PersonService = personService;
-        }
 
         [HttpGet]
         public IActionResult Get()
         {
-            var people = PersonRepository.GetAll();
+            this.Logger.LogInformation("Get people called");
+            var people = this.PersonRepository.GetAll();
             var peopleResult = people.ToPersonDto();
-            return Ok(peopleResult);
+            return this.Ok(peopleResult);
         }
 
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
-            var person = PersonRepository.GetById(id);
-
-            if (person == null)
+            this.Logger.LogError("Get person called");
+            try
             {
-                return NotFound();
+                var person = this.PersonRepository.GetById(id);
+                var personResult = person.ToPersonDto();
+                return this.Ok(personResult);
             }
-            var personResult = person.ToPersonDto();
-            return Ok(personResult);
+            catch (Exception ex)
+            {
+                this.Logger.LogError(ex.Message);
+                return this.NotFound();
+            }
         }
 
         [HttpPost]
         public IActionResult Post([FromBody]PersonDto person)
         {
-            return NotFound();
+            return this.NotFound();
         }
 
         [HttpPut("{id}")]
         public IActionResult Put(int id, [FromBody]UpdatePerson updatePerson)
         {
-            var person = this.PersonService.UpdatePerson(id, updatePerson);
-            if (person == null)
+            this.Logger.LogInformation("Update person called");
+            try
             {
-                return NotFound();
+                var person = this.PersonService.UpdatePerson(id, updatePerson);
+                var personResult = person.ToPersonDto();
+                return this.Ok(personResult);
             }
-            var personResult = person.ToPersonDto();
-            return Ok(personResult);
+            catch (Exception ex)
+            {
+                this.Logger.LogInformation(ex.Message);
+                return this.NotFound();
+            }
         }
 
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            return NotFound();
+            return this.NotFound();
         }
     }
 }

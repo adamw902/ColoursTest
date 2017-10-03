@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NLog.Extensions.Logging;
+using NLog.Web;
 
 namespace ColoursTest.Web
 {
@@ -18,8 +20,8 @@ namespace ColoursTest.Web
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
+                .AddJsonFile("appsettings.json", false, true)
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", true)
                 .AddEnvironmentVariables();
             Configuration = builder.Build();
         }
@@ -33,6 +35,7 @@ namespace ColoursTest.Web
             services.AddMvc();
 
             services.AddSingleton<IConfiguration>(Configuration);
+            services.AddSingleton<ILoggerFactory, LoggerFactory>();
             services.AddSingleton<IConnectionFactory, SqlConnectionFactory>();
 
             services.AddTransient<IPersonRepository, PersonRepository>();
@@ -43,8 +46,8 @@ namespace ColoursTest.Web
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
-            loggerFactory.AddDebug();
+            loggerFactory.AddNLog();
+            app.AddNLogWeb();
 
             app.UseMvc();
         }
@@ -53,7 +56,5 @@ namespace ColoursTest.Web
 
 
 //todo: 
-//Enable reshaper, with coding standards(.settings)
-//Add Nlog(via ILogger interface)
+//finish adding Nlog
 //Customise git(gitconfig / aliases)
-//Presentation on SOLID principles for (next Monday 2pm)

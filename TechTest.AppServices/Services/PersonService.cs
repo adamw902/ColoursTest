@@ -11,19 +11,18 @@ namespace ColoursTest.AppServices.Services
     {
         public PersonService(IPersonRepository people, IColourRepository colours)
         {
-            People = people;
-            Colours = colours;
+            this.People = people;
+            this.Colours = colours;
         }
 
         private IPersonRepository People { get; }
-
         private IColourRepository Colours { get; }
 
         public Person UpdatePerson(int personId, UpdatePerson request)
         {
             if (request == null)
             {
-                throw new ArgumentNullException(nameof(request), "update person request is null.");
+                throw new ArgumentNullException(nameof(request), "Update person request is null.");
             }
 
             var person = this.People.GetById(personId);
