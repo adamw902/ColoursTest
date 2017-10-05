@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using ColoursTest.Domain.Exceptions;
 using ColoursTest.Domain.Interfaces;
 using ColoursTest.Domain.Models;
 using ColoursTest.Infrastructure.Interfaces;
@@ -54,7 +55,7 @@ namespace ColoursTest.Infrastructure.Repositories
                 var person = connection.Query<Person>(selectPerson, new {PersonId = personId.ToString()}).SingleOrDefault();
                 if (person == null)
                 {
-                    throw new Exception("No person found with the given id");
+                    throw new IncorrectIdException("No person found with the given id");
                 }
 
                 var selectPersonColours = @"SELECT C.* FROM [Colours] C 
@@ -71,7 +72,7 @@ namespace ColoursTest.Infrastructure.Repositories
         {
             if (person == null)
             {
-                throw new ArgumentNullException(nameof(person), "Can't create null person.");
+                throw new IncorrectFormatException("Can't create null person.");
             }
 
             using (var connection = this.ConnectionFactory.GetConnection())
@@ -91,7 +92,7 @@ namespace ColoursTest.Infrastructure.Repositories
                     }
                     catch
                     {
-                        throw new Exception("Failed to save person's favourite colours, one or more ColourId's may be incorrect.");
+                        throw new IncorrectIdException("Failed to save person's favourite colours, one or more ColourId's may be incorrect.");
                     }
                 }
                 return person;
@@ -103,7 +104,7 @@ namespace ColoursTest.Infrastructure.Repositories
         {
             if (person == null)
             {
-                throw new ArgumentNullException(nameof(person), "Can't update null person.");
+                throw new IncorrectFormatException("Can't update null person.");
             }
 
             using (var connection = this.ConnectionFactory.GetConnection())
@@ -128,7 +129,7 @@ namespace ColoursTest.Infrastructure.Repositories
                     }
                     catch
                     {
-                        throw new Exception("Failed to save person's favourite colours, one or more ColourId's may be incorrect.");
+                        throw new IncorrectIdException("Failed to save person's favourite colours, one or more ColourId's may be incorrect.");
                     }
                 }
                 return person;

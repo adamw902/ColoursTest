@@ -2,6 +2,7 @@
 using ColoursTest.AppServices.Interfaces;
 using ColoursTest.Domain.Interfaces;
 using ColoursTest.Infrastructure.DTOs;
+using ColoursTest.Web.Filters;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,6 +10,7 @@ using Microsoft.Extensions.Logging;
 
 namespace ColoursTest.Web.Controllers
 {
+    [ServiceFilter(typeof(CustomExceptionFilterAttribute))]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
     public class ColoursController : Controller
@@ -36,48 +38,24 @@ namespace ColoursTest.Web.Controllers
         public IActionResult Get(int id)
         {
             this.Logger.LogInformation("Get colour called");
-            try
-            {
-                var colour = this.ColourRepository.GetById(id);
-                return this.Ok(colour);
-            }
-            catch (Exception ex)
-            {
-                this.Logger.LogInformation(ex.Message);
-                return this.NotFound(ex.Message);
-            }
+            var colour = this.ColourRepository.GetById(id);
+            return this.Ok(colour);
         }
 
         [HttpPost]
         public IActionResult Post([FromBody]CreateUpdateColour createColourRequest)
         {
             this.Logger.LogInformation("Create colour called");
-            try
-            {
-                var colour = this.ColourService.CreateColour(createColourRequest);
-                return this.Ok(colour);
-            }
-            catch (Exception ex)
-            {
-                this.Logger.LogInformation(ex.Message);
-                return this.NotFound(ex.Message);
-            }
+            var colour = this.ColourService.CreateColour(createColourRequest);
+            return this.Ok(colour);
         }
 
         [HttpPut("{id}")]
         public IActionResult Put(int id, [FromBody]CreateUpdateColour updateColourRequest)
         {
             this.Logger.LogInformation("Update colour called");
-            try
-            {
-                var colour = this.ColourService.UpdateColour(id, updateColourRequest);
-                return this.Ok(colour);
-            }
-            catch (Exception ex)
-            {
-                this.Logger.LogInformation(ex.Message);
-                return this.NotFound(ex.Message);
-            }
+            var colour = this.ColourService.UpdateColour(id, updateColourRequest);
+            return this.Ok(colour);
         }
     }
 }

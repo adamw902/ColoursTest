@@ -4,7 +4,6 @@ using System.Security.Claims;
 using System.Security.Principal;
 using ColoursTest.Infrastructure.DTOs;
 using ColoursTest.Web.Common;
-using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -51,8 +50,12 @@ namespace ColoursTest.Web.Controllers
         {
             var handler = new JwtSecurityTokenHandler();
 
-            var identity = new ClaimsIdentity(new GenericIdentity(request.Username, "TokenAuth"),
-                                              new[] {new Claim("username", request.Username)});
+            var claims = new[]
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, request.Username),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+            var identity = new ClaimsIdentity(new GenericIdentity(request.Username, "TokenAuth"), claims);
 
             var securityToken = handler.CreateToken(new SecurityTokenDescriptor
             {

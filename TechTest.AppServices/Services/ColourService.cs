@@ -1,5 +1,6 @@
 ﻿using System;
 using ColoursTest.AppServices.Interfaces;
+using ColoursTest.Domain.Exceptions;
 using ColoursTest.Domain.Interfaces;
 using ColoursTest.Domain.Models;
 using ColoursTest.Infrastructure.DTOs;
@@ -19,7 +20,7 @@ namespace ColoursTest.AppServices.Services
         {
             if (request == null)
             {
-                throw new ArgumentNullException(nameof(request), "Cannot update null colour.");
+                throw new IncorrectFormatException("Cannot update null colour.");
             }
             var colour = new Colour(request.Name, request.IsEnabled);
             return this.Colours.Insert(colour);

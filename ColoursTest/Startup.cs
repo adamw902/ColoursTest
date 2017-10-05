@@ -6,6 +6,7 @@ using ColoursTest.Domain.Interfaces;
 using ColoursTest.Infrastructure.Interfaces;
 using ColoursTest.Infrastructure.Repositories;
 using ColoursTest.Web.Common;
+using ColoursTest.Web.Filters;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
@@ -40,6 +41,8 @@ namespace ColoursTest.Web
         {
             // Add framework services.
             services.AddMvc();
+
+            services.AddScoped<CustomExceptionFilterAttribute>();
 
             services.AddSingleton<IConfiguration>(Configuration);
             services.AddSingleton<ILoggerFactory, LoggerFactory>();

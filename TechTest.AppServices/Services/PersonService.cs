@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using ColoursTest.AppServices.Interfaces;
+using ColoursTest.Domain.Exceptions;
 using ColoursTest.Domain.Interfaces;
 using ColoursTest.Domain.Models;
 using ColoursTest.Infrastructure.DTOs;
@@ -23,7 +24,7 @@ namespace ColoursTest.AppServices.Services
         {
             if (request == null)
             {
-                throw new ArgumentNullException(nameof(request), "Cannot create null person.");
+                throw new IncorrectFormatException("Cannot create null person.");
             }
 
             List<Colour> colours = new List<Colour>();
@@ -40,7 +41,7 @@ namespace ColoursTest.AppServices.Services
         {
             if (request == null)
             {
-                throw new ArgumentNullException(nameof(request), "Cannot update null person.");
+                throw new IncorrectFormatException("Cannot update null person.");
             }
 
             var person = this.People.GetById(personId);

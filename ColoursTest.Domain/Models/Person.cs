@@ -1,6 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using ColoursTest.Domain.Exceptions;
 
 namespace ColoursTest.Domain.Models
 {
@@ -11,11 +11,11 @@ namespace ColoursTest.Domain.Models
         {
             if (string.IsNullOrWhiteSpace(firstName))
             {
-                throw new Exception("First Name must have a value.");
+                throw new IncorrectFormatException("First Name must have a value.");
             }
             if (string.IsNullOrWhiteSpace(lastName))
             {
-                throw new Exception("Last Name must have a value");
+                throw new IncorrectFormatException("Last Name must have a value");
             }
             this.FirstName = firstName;
             this.LastName = lastName;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using ColoursTest.Domain.Exceptions;
 
 namespace ColoursTest.Domain.Models
 {
@@ -10,7 +11,7 @@ namespace ColoursTest.Domain.Models
         {
             if (string.IsNullOrWhiteSpace(name))
             {
-                throw new Exception("Name must have a value.");
+                throw new IncorrectFormatException("Name must have a value.");
             }
             this.Name = name;
             this.IsEnabled = isEnabled ?? false;

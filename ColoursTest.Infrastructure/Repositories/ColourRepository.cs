@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ColoursTest.Domain.Exceptions;
 using ColoursTest.Domain.Interfaces;
 using ColoursTest.Domain.Models;
 using ColoursTest.Infrastructure.Interfaces;
@@ -33,7 +34,7 @@ namespace ColoursTest.Infrastructure.Repositories
                 var colour = connection.Query<Colour>(selectColour, new {ColourId = colourId}).SingleOrDefault();
                 if (colour == null)
                 {
-                    throw new Exception("Colour does not exist with the given id.");
+                    throw new IncorrectIdException("Colour does not exist with the given id.");
                 }
                 return colour;
             }
@@ -43,7 +44,7 @@ namespace ColoursTest.Infrastructure.Repositories
         {
             if (colour == null)
             {
-                throw new ArgumentNullException(nameof(colour), "Can't create null colour.");
+                throw new IncorrectFormatException("Can't create null colour.");
             }
 
             using (var connection = this.ConnectionFactory.GetConnection())
@@ -59,7 +60,7 @@ namespace ColoursTest.Infrastructure.Repositories
         {
             if (colour == null)
             {
-                throw new ArgumentNullException(nameof(colour), "Can't update null colour.");
+                throw new IncorrectFormatException("Can't update null colour.");
             }
             this.GetById(colour.ColourId);
 
