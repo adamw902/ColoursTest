@@ -5,6 +5,7 @@ namespace ColoursTest.AppServices.Interfaces
 {
     public interface IPersonService
     {
-        Person UpdatePerson(int personId, UpdatePerson request);
+        Person CreatePerson(CreateUpdatePerson request);
+        Person UpdatePerson(int personId, CreateUpdatePerson request);
     }
 }

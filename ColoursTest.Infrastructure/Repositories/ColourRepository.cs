@@ -21,8 +21,7 @@ namespace ColoursTest.Infrastructure.Repositories
         {
             using (var connection = this.ConnectionFactory.GetConnection())
             {
-                var colours = connection.Query<Colour>("SELECT * FROM [Colours];");
-                return colours;
+                return connection.Query<Colour>("SELECT * FROM [Colours];");
             }
         }
 
@@ -30,24 +29,48 @@ namespace ColoursTest.Infrastructure.Repositories
         {
             using (var connection = this.ConnectionFactory.GetConnection())
             {
-                var colour = connection.Query<Colour>("SELECT * FROM [Colours] WHERE ColourId = @ColourId;", new {ColourId = colourId});
-                return colour.SingleOrDefault();
+                var selectColour = "SELECT * FROM [Colours] WHERE ColourId = @ColourId;";
+                var colour = connection.Query<Colour>(selectColour, new {ColourId = colourId}).SingleOrDefault();
+                if (colour == null)
+                {
+                    throw new Exception("Colour does not exist with the given id.");
+                }
+                return colour;
             }
         }
 
-        public Colour Insert(Colour item)
+        public Colour Insert(Colour colour)
         {
-            throw new NotImplementedException();
+            if (colour == null)
+            {
+                throw new ArgumentNullException(nameof(colour), "Can't create null colour.");
+            }
+
+            using (var connection = this.ConnectionFactory.GetConnection())
+            {
+                var insertColour = @"INSERT INTO [Colours] (Name, IsEnabled) VALUES (@Name, @IsEnabled);
+                                     SELECT CAST(SCOPE_IDENTITY() as int);";
+                colour.ColourId = connection.Query<int>(insertColour, colour).Single();
+                return colour;
+            }
         }
 
-        public Colour Update(Colour item)
+        public Colour Update(Colour colour)
         {
-            throw new NotImplementedException();
-        }
+            if (colour == null)
+            {
+                throw new ArgumentNullException(nameof(colour), "Can't update null colour.");
+            }
+            this.GetById(colour.ColourId);
 
-        public void Delete(int id)
-        {
-            throw new NotImplementedException();
+            using (var connection = this.ConnectionFactory.GetConnection())
+            {
+                var updateColour = @"UPDATE [Colours]
+                                     SET Name = @Name, IsEnabled = @IsEnabled
+                                     WHERE ColourId = @ColourId;";
+                connection.Execute(updateColour, colour);
+            }
+            return colour;
         }
     }
 }

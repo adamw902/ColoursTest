@@ -3,11 +3,14 @@ using ColoursTest.AppServices.Interfaces;
 using ColoursTest.Domain.Interfaces;
 using ColoursTest.Infrastructure.DTOs;
 using ColoursTest.Infrastructure.Extensions;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
 namespace ColoursTest.Web.Controllers
 {
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
     public class PeopleController : Controller
     {
@@ -44,18 +47,29 @@ namespace ColoursTest.Web.Controllers
             catch (Exception ex)
             {
                 this.Logger.LogError(ex.Message);
-                return this.NotFound();
+                return this.NotFound(ex.Message);
             }
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody]PersonDto person)
+        public IActionResult Post([FromBody]CreateUpdatePerson createPerson)
         {
-            return this.NotFound();
+            this.Logger.LogInformation("Create person called");
+            try
+            {
+                var person = this.PersonService.CreatePerson(createPerson);
+                var personResult = person.ToPersonDto();
+                return this.Ok(personResult);
+            }
+            catch (Exception ex)
+            {
+                this.Logger.LogInformation(ex.Message);
+                return this.NotFound(ex.Message);
+            }
         }
 
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody]UpdatePerson updatePerson)
+        public IActionResult Put(int id, [FromBody]CreateUpdatePerson updatePerson)
         {
             this.Logger.LogInformation("Update person called");
             try
@@ -67,14 +81,8 @@ namespace ColoursTest.Web.Controllers
             catch (Exception ex)
             {
                 this.Logger.LogInformation(ex.Message);
-                return this.NotFound();
+                return this.NotFound(ex.Message);
             }
-        }
-
-        [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
-        {
-            return this.NotFound();
         }
     }
 }

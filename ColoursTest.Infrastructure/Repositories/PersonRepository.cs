@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
 using System.Linq;
 using ColoursTest.Domain.Interfaces;
 using ColoursTest.Domain.Models;
@@ -70,7 +69,33 @@ namespace ColoursTest.Infrastructure.Repositories
 
         public Person Insert(Person person)
         {
-            throw new System.NotImplementedException();
+            if (person == null)
+            {
+                throw new ArgumentNullException(nameof(person), "Can't create null person.");
+            }
+
+            using (var connection = this.ConnectionFactory.GetConnection())
+            {
+                connection.Open();
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        var insertPerson = @"INSERT INTO [People] (FirstName, LastName, IsAuthorised, IsValid, IsEnabled)
+                                             VALUES(@FirstName, @LastName, @IsAuthorised, @IsValid, @IsEnabled);
+                                             SELECT CAST(SCOPE_IDENTITY() as int);";
+                        person.PersonId = connection.Query<int>(insertPerson, person, transaction).Single();
+                        
+                        this.InsertColours(person.PersonId, person.FavouriteColours, connection, transaction);
+                        transaction.Commit();
+                    }
+                    catch
+                    {
+                        throw new Exception("Failed to save person's favourite colours, one or more ColourId's may be incorrect.");
+                    }
+                }
+                return person;
+            }
         }
 
 
@@ -78,7 +103,7 @@ namespace ColoursTest.Infrastructure.Repositories
         {
             if (person == null)
             {
-                throw new ArgumentNullException(nameof(person), "Cant update null person");
+                throw new ArgumentNullException(nameof(person), "Can't update null person.");
             }
 
             using (var connection = this.ConnectionFactory.GetConnection())
@@ -89,34 +114,33 @@ namespace ColoursTest.Infrastructure.Repositories
                     try
                     {
                         var updatePersonDetails = @"UPDATE [People] 
-                                                    SET IsEnabled = @IsEnabled, IsAuthorised = @IsAuthorised, IsValid = @IsValid 
+                                                    SET FirstName = @FirstName, LastName = @LastName,
+                                                        IsAuthorised = @IsAuthorised, IsValid = @IsValid,
+                                                        IsEnabled = @IsEnabled
                                                     WHERE PersonId = @PersonId;";
-                        connection.Execute(updatePersonDetails,
-                            new
-                            {
-                                person.IsEnabled,
-                                person.IsAuthorised,
-                                person.IsValid,
-                                person.PersonId
-                            }, transaction);
+                        connection.Execute(updatePersonDetails, person, transaction);
 
                         var deletePersonColours = "DELETE FROM [FavouriteColours] WHERE PersonId = @PersonId;";
                         connection.Execute(deletePersonColours, new { person.PersonId }, transaction);
 
-                        var insertPersonColour = "INSERT INTO [FavouriteColours] (PersonId, ColourId) VALUES (20, 20);";
-                        foreach (var favouriteColour in person.FavouriteColours)
-                        {
-                            connection.Execute(insertPersonColour, new { person.PersonId, favouriteColour.ColourId }, transaction);
-                        }
+                        this.InsertColours(person.PersonId, person.FavouriteColours, connection, transaction);
                         transaction.Commit();
                     }
-                    catch (SqlException ex)
+                    catch
                     {
-                        throw new Exception("A colour doesn't exist with the given id");
+                        throw new Exception("Failed to save person's favourite colours, one or more ColourId's may be incorrect.");
                     }
                 }
-                var updatedPerson = this.GetById(person.PersonId);
-                return updatedPerson;
+                return person;
+            }
+        }
+
+        private void InsertColours(int personId, IEnumerable<Colour> colours, IDbConnection connection, IDbTransaction transaction)
+        {
+            var insertFavouriteColour = "INSERT INTO [FavouriteColours] (PersonId, ColourId) VALUES (@PersonId, @ColourId);";
+            foreach (var colour in colours)
+            {
+                connection.Execute(insertFavouriteColour, new { personId, colour.ColourId }, transaction);
             }
         }
     }
