@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
 using ColoursTest.Domain.Exceptions;
 using ColoursTest.Domain.Interfaces;
 using ColoursTest.Domain.Models;
@@ -19,60 +20,69 @@ namespace ColoursTest.Infrastructure.Repositories
 
         private IConnectionFactory ConnectionFactory { get; }
 
-        public IEnumerable<Person> GetAll()
+        public async Task<IEnumerable<Person>> GetAll()
         {
             using (var connection = this.ConnectionFactory.GetConnection())
             {
-                var selectPeopleAndColours = @"SELECT P.*, C.* FROM [People] P
-                                               INNER JOIN [FavouriteColours] FC
-                                               ON P.PersonId = FC.PersonId
-                                               INNER JOIN [Colours] C
-                                               ON FC.ColourId = C.ColourId;";
-                var results = connection
-                    .Query<Person, Colour, Person>(selectPeopleAndColours,
-                    (person, colour) =>
-                    {
-                        person.FavouriteColours = person.FavouriteColours ?? new List<Colour>();
-                        person.FavouriteColours.Add(colour);
-                        return person;
-                    }, splitOn: "PersonId, ColourId")
-                    .GroupBy(r => r.PersonId).Select(group =>
-                    {
-                        var groupedPerson = group.First();
-                        groupedPerson.FavouriteColours = group.Select(c => c.FavouriteColours.Single()).ToList();
-                        return groupedPerson;
-                    }
-                );
+                var selectPeopleAndColours = @"
+                            SELECT P.*, 
+                                   C.*
+                              FROM [People] P
+                        INNER JOIN [FavouriteColours] FC
+                                ON P.PersonId = FC.PersonId
+                        INNER JOIN [Colours] C
+                                ON FC.ColourId = C.ColourId;";
+
+                var results = (await connection
+                        .QueryAsync<Person, Colour, Person>(selectPeopleAndColours,
+                            (person, colour) =>
+                            {
+                                person.FavouriteColours = person.FavouriteColours ?? new List<Colour>();
+                                person.FavouriteColours.Add(colour);
+                                return person;
+                            }, splitOn: "PersonId, ColourId"))
+                        .GroupBy(r => r.PersonId).Select(group =>
+                            {
+                                var groupedPerson = group.First();
+                                groupedPerson.FavouriteColours = group.Select(c => c.FavouriteColours.Single()).ToList();
+                                return groupedPerson;
+                            }
+                        );
                 return results;
             }
         }
 
-        public Person GetById(int personId)
+        public async Task<Person> GetById(int personId)
         {
             using (var connection = this.ConnectionFactory.GetConnection())
             {
                 var selectPerson = "SELECT * FROM [People] WHERE PersonId = @PersonId;";
-                var person = connection.Query<Person>(selectPerson, new {PersonId = personId.ToString()}).SingleOrDefault();
+                var person = (await connection.QueryAsync<Person>(selectPerson, new {PersonId = personId.ToString()})).SingleOrDefault();
+
                 if (person == null)
                 {
-                    throw new IncorrectIdException("No person found with the given id");
+                    return null;
                 }
 
-                var selectPersonColours = @"SELECT C.* FROM [Colours] C 
-                                            INNER JOIN [FavouriteColours] FC 
-                                            ON C.ColourId = FC.ColourId 
-                                            WHERE FC.PersonId = @PersonId;";
-                var colours = connection.Query<Colour>(selectPersonColours, new {PersonId = personId.ToString()}).ToList();
-                person.FavouriteColours = colours;
+                var selectPersonColours = @"
+                            SELECT C.*
+                              FROM [Colours] C 
+                        INNER JOIN [FavouriteColours] FC 
+                                ON C.ColourId = FC.ColourId 
+                             WHERE FC.PersonId = @PersonId;";
+
+                var colours = await connection.QueryAsync<Colour>(selectPersonColours, new {PersonId = personId.ToString()});
+                person.FavouriteColours = (IList<Colour>) colours;
+
                 return person;
             }
         }
 
-        public Person Insert(Person person)
+        public async Task<Person> Insert(Person person)
         {
             if (person == null)
             {
-                throw new IncorrectFormatException("Can't create null person.");
+                throw new ArgumentNullException(nameof(person), "Can't create null person.");
             }
 
             using (var connection = this.ConnectionFactory.GetConnection())
@@ -80,68 +90,72 @@ namespace ColoursTest.Infrastructure.Repositories
                 connection.Open();
                 using (var transaction = connection.BeginTransaction())
                 {
-                    try
-                    {
-                        var insertPerson = @"INSERT INTO [People] (FirstName, LastName, IsAuthorised, IsValid, IsEnabled)
-                                             VALUES(@FirstName, @LastName, @IsAuthorised, @IsValid, @IsEnabled);
-                                             SELECT CAST(SCOPE_IDENTITY() as int);";
-                        person.PersonId = connection.Query<int>(insertPerson, person, transaction).Single();
-                        
-                        this.InsertColours(person.PersonId, person.FavouriteColours, connection, transaction);
-                        transaction.Commit();
-                    }
-                    catch
-                    {
-                        throw new IncorrectIdException("Failed to save person's favourite colours, one or more ColourId's may be incorrect.");
-                    }
+                    var insertPerson = @"
+                            INSERT INTO [People] (FirstName, LastName, IsAuthorised, IsValid, IsEnabled)
+                                 VALUES (@FirstName, @LastName, @IsAuthorised, @IsValid, @IsEnabled);
+                                 SELECT CAST(SCOPE_IDENTITY() as int);";
+
+                    person.PersonId = (await connection.QueryAsync<int>(insertPerson, person, transaction)).Single();
+
+                    var insertFavouriteColours =
+                        person.FavouriteColours
+                            .Aggregate(string.Empty, (current, colour) =>
+                                $"{current}INSERT INTO[FavouriteColours] (PersonId, ColourId) VALUES({person.PersonId}, {colour.ColourId});");
+
+                    await connection.ExecuteAsync(insertFavouriteColours, null, transaction);
+                    transaction.Commit();
                 }
                 return person;
             }
         }
 
 
-        public Person Update(Person person)
+        public async Task<Person> Update(Person person)
         {
-            if (person == null)
+            if (person == null || person.PersonId == 0)
             {
-                throw new IncorrectFormatException("Can't update null person.");
+                throw new ArgumentNullException(nameof(person), "Can't update null person.");
             }
 
             using (var connection = this.ConnectionFactory.GetConnection())
             {
                 connection.Open();
+
                 using (var transaction = connection.BeginTransaction())
                 {
-                    try
-                    {
-                        var updatePersonDetails = @"UPDATE [People] 
-                                                    SET FirstName = @FirstName, LastName = @LastName,
-                                                        IsAuthorised = @IsAuthorised, IsValid = @IsValid,
-                                                        IsEnabled = @IsEnabled
-                                                    WHERE PersonId = @PersonId;";
-                        connection.Execute(updatePersonDetails, person, transaction);
+                    var updatePerson = @"
+                            UPDATE [People] 
+                               SET FirstName = @FirstName, 
+                                   LastName = @LastName, 
+                                   IsAuthorised = @IsAuthorised, 
+                                   IsValid = @IsValid,
+                                   IsEnabled = @IsEnabled
+                             WHERE PersonId = @PersonId;";
 
-                        var deletePersonColours = "DELETE FROM [FavouriteColours] WHERE PersonId = @PersonId;";
-                        connection.Execute(deletePersonColours, new { person.PersonId }, transaction);
+                    var deletePersonColours = "DELETE FROM [FavouriteColours] WHERE PersonId = @PersonId;";
 
-                        this.InsertColours(person.PersonId, person.FavouriteColours, connection, transaction);
-                        transaction.Commit();
-                    }
-                    catch
-                    {
-                        throw new IncorrectIdException("Failed to save person's favourite colours, one or more ColourId's may be incorrect.");
-                    }
+                    var insertFavouriteColours =
+                        person.FavouriteColours
+                            .Aggregate(string.Empty, (current, colour) =>
+                                $"{current}INSERT INTO[FavouriteColours] (PersonId, ColourId) VALUES({person.PersonId}, {colour.ColourId});");
+
+                    updatePerson = $"{updatePerson}{deletePersonColours}{insertFavouriteColours}";
+
+                    await connection.ExecuteAsync(updatePerson, person, transaction);
+
+                    transaction.Commit();
                 }
+
                 return person;
             }
         }
 
-        private void InsertColours(int personId, IEnumerable<Colour> colours, IDbConnection connection, IDbTransaction transaction)
+        private async void InsertPersonColours(int personId, IEnumerable<Colour> colours, IDbConnection connection, IDbTransaction transaction)
         {
             var insertFavouriteColour = "INSERT INTO [FavouriteColours] (PersonId, ColourId) VALUES (@PersonId, @ColourId);";
             foreach (var colour in colours)
             {
-                connection.Execute(insertFavouriteColour, new { personId, colour.ColourId }, transaction);
+                await connection.ExecuteAsync(insertFavouriteColour, new { personId, colour.ColourId }, transaction);
             }
         }
     }

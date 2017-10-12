@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ColoursTest.Domain.Interfaces
 {
-    public interface IReadableRepository<out T, in TK> where T : class
+    public interface IReadableRepository<T, in TK> where T : class
     {
-        IEnumerable<T> GetAll();
-        T GetById(TK id);
+        Task<IEnumerable<T>> GetAll();
+
+        Task<T> GetById(TK id);
     }
 }

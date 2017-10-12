@@ -4,19 +4,19 @@ using ColoursTest.AppServices.Services;
 using ColoursTest.Infrastructure.Factories;
 using ColoursTest.Domain.Interfaces;
 using ColoursTest.Infrastructure.Interfaces;
+using ColoursTest.Infrastructure.Middleware;
 using ColoursTest.Infrastructure.Repositories;
 using ColoursTest.Web.Common;
 using ColoursTest.Web.Filters;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json;
 using NLog.Extensions.Logging;
 using NLog.Web;
 
@@ -40,10 +40,19 @@ namespace ColoursTest.Web
         public void ConfigureServices(IServiceCollection services)
         {
             // Add framework services.
-            services.AddMvc();
+            services.AddMvc(options =>
+            {
+                options.Filters.Add(typeof(CustomExceptionFilterAttribute));
+                var policy = new AuthorizationPolicyBuilder()
+                                .RequireAuthenticatedUser()
+                                .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
+                                .Build();
+
+                options.Filters.Add(new AuthorizeFilter(policy));
+            });
 
             services.AddScoped<CustomExceptionFilterAttribute>();
-
+            
             services.AddSingleton<IConfiguration>(Configuration);
             services.AddSingleton<ILoggerFactory, LoggerFactory>();
             services.AddSingleton<IConnectionFactory, SqlConnectionFactory>();
@@ -71,18 +80,6 @@ namespace ColoursTest.Web
                             ValidateLifetime = true,
                             ClockSkew = TimeSpan.Zero
                         };
-                        //options.Events = new JwtBearerEvents
-                        //{
-                        //    OnChallenge = context =>
-                        //    {
-                        //        if (!context.Handled)
-                        //        {
-                        //            context.Response.StatusCode = 401;
-                        //        }
-                        //        return Task.FromResult<object>(0);
-                        //    }
-                        //};
-                        //options.SecurityTokenValidators.Add(new JwtValidator(new SystemClock()));
                     });
         }
 
@@ -92,39 +89,10 @@ namespace ColoursTest.Web
             loggerFactory.AddNLog();
             app.AddNLogWeb();
 
+            app.UseMiddleware<ExceptionMiddleware>();
             app.UseAuthentication();
-            //app.UseExceptionHandler(appBuilder =>
-            //{
-            //    appBuilder.Use(async (context, next) =>
-            //    {
-            //        var error = context.Features[typeof(IExceptionHandlerFeature)] as IExceptionHandlerFeature;
-
-            //        //when authorization has failed, should retrun a json message to client
-            //        if (error?.Error is SecurityTokenExpiredException)
-            //        {
-            //            context.Response.StatusCode = 401;
-            //            context.Response.ContentType = "application/json";
-
-            //            await context.Response.WriteAsync(JsonConvert.SerializeObject(new {State = 401, Msg = "token invalid"}));
-            //        }
-            //        //when other error, retrun a error message json to client
-            //        else if (error?.Error != null)
-            //        {
-            //            context.Response.StatusCode = 500;
-            //            context.Response.ContentType = "application/json";
-            //            await context.Response.WriteAsync(JsonConvert.SerializeObject(new {State = 500, Msg = error.Error.Message}.ToString()));
-            //        }
-            //        //when no error, do next.
-            //        else await next();
-            //    });
-            //});
 
             app.UseMvc();
         }
     }
 }
-
-
-//todo: 
-//finish adding Nlog
-//Customise git(gitconfig / aliases)

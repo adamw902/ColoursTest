@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Threading.Tasks;
 using ColoursTest.AppServices.Interfaces;
-using ColoursTest.Domain.Exceptions;
 using ColoursTest.Domain.Interfaces;
 using ColoursTest.Domain.Models;
 using ColoursTest.Infrastructure.DTOs;
@@ -16,24 +16,36 @@ namespace ColoursTest.AppServices.Services
 
         private IColourRepository Colours { get; }
 
-        public Colour CreateColour(CreateUpdateColour request)
+        public async Task<Colour> CreateColour(CreateUpdateColour request)
         {
             if (request == null)
             {
-                throw new IncorrectFormatException("Cannot update null colour.");
+                throw new ArgumentNullException(nameof(request), "Cannot create null colour.");
             }
-            var colour = new Colour(request.Name, request.IsEnabled);
-            return this.Colours.Insert(colour);
+
+            var colour = new Colour(0, request.Name, request.IsEnabled ?? false);
+
+            return await this.Colours.Insert(colour);
         }
 
-        public Colour UpdateColour(int colourId, CreateUpdateColour request)
+        public async Task<Colour> UpdateColour(int colourId, CreateUpdateColour request)
         {
-            var colour = this.Colours.GetById(colourId);
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request), "Cannot update null colour.");
+            }
+
+            var colour = await this.Colours.GetById(colourId);
+
+            if (colour == null)
+            {
+                return null;
+            }
 
             colour.Name = !string.IsNullOrWhiteSpace(request.Name) ? request.Name : colour.Name;
             colour.IsEnabled = request.IsEnabled ?? colour.IsEnabled;
 
-            return this.Colours.Update(colour);
+            return await this.Colours.Update(colour);
         }
     }
 }

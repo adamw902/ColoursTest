@@ -1,8 +1,11 @@
-﻿namespace ColoursTest.Domain.Interfaces
+﻿using System.Threading.Tasks;
+
+namespace ColoursTest.Domain.Interfaces
 {
     public interface IWriteableRepository<T> where T : class
     {
-        T Insert(T item);
-        T Update(T item);
+        Task<T> Insert(T item);
+
+        Task<T> Update(T item);
     }
 }

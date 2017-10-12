@@ -1,61 +1,77 @@
-﻿using System;
+﻿using System.Threading.Tasks;
 using ColoursTest.AppServices.Interfaces;
 using ColoursTest.Domain.Interfaces;
 using ColoursTest.Infrastructure.DTOs;
-using ColoursTest.Web.Filters;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
+using ColoursTest.Infrastructure.Extensions;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-
 namespace ColoursTest.Web.Controllers
 {
-    [ServiceFilter(typeof(CustomExceptionFilterAttribute))]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    [Route("api/[controller]")]
+    [Route("api/colours")]
     public class ColoursController : Controller
     {
-        public ColoursController(ILogger<ColoursController> logger, IColourRepository colourRepository, IColourService colourService)
+        public ColoursController(
+            IColourRepository colourRepository, 
+            IColourService colourService)
         {
-            this.Logger = logger;
             this.ColourRepository = colourRepository;
             this.ColourService = colourService;
         }
-
-        private ILogger<ColoursController> Logger { get; }
+        
         private IColourRepository ColourRepository { get; }
+
         private IColourService ColourService { get; }
 
         [HttpGet]
-        public IActionResult Get()
+        public async Task<IActionResult> Get()
         {
-            this.Logger.LogInformation("Get colours called");
-            var colours = this.ColourRepository.GetAll();
-            return this.Ok(colours);
+            var colours = await this.ColourRepository.GetAll();
+            var colourResult = colours.ToColourDto();
+
+            return this.Ok(colourResult);
         }
 
         [HttpGet("{id}")]
-        public IActionResult Get(int id)
+        public async Task<IActionResult> Get(int id)
         {
-            this.Logger.LogInformation("Get colour called");
-            var colour = this.ColourRepository.GetById(id);
-            return this.Ok(colour);
+            var colour = await this.ColourRepository.GetById(id);
+
+            if (colour == null)
+            {
+                return this.NotFound();
+            }
+
+            var colourResult = colour.ToColourDto();
+
+            return this.Ok(colourResult);
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody]CreateUpdateColour createColourRequest)
+        public async Task<IActionResult> Post([FromBody]CreateUpdateColour createColourRequest)
         {
-            this.Logger.LogInformation("Create colour called");
-            var colour = this.ColourService.CreateColour(createColourRequest);
-            return this.Ok(colour);
+            if (!this.ModelState.IsValid)
+            {
+                return this.BadRequest(this.ModelState);
+            }
+
+            var colour = await this.ColourService.CreateColour(createColourRequest);
+            var colourResult = colour.ToColourDto();
+
+            return this.Ok(colourResult);
         }
 
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody]CreateUpdateColour updateColourRequest)
+        public async Task<IActionResult> Put(int id, [FromBody]CreateUpdateColour updateColourRequest)
         {
-            this.Logger.LogInformation("Update colour called");
-            var colour = this.ColourService.UpdateColour(id, updateColourRequest);
-            return this.Ok(colour);
+            var colour = await this.ColourService.UpdateColour(id, updateColourRequest);
+
+            if (colour == null)
+            {
+                return this.NotFound();
+            }
+
+            var colourResult = colour.ToColourDto();
+
+            return this.Ok(colourResult);
         }
     }
 }

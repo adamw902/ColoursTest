@@ -7,14 +7,36 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Repositories\DBScripts\CreateDatabase.sql" />
+    <None Remove="Repositories\DBScripts\CreateTables.sql" />
+    <None Remove="Repositories\DBScripts\InsertMockData.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Repositories\DBScripts\CreateDatabase.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Repositories\DBScripts\CreateTables.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Repositories\DBScripts\InsertMockData.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="4.19.4" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0-preview-20170628-02" />
-    <PackageReference Include="xunit" Version="2.2.0" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.3.0" />
+    <PackageReference Include="NSubstitute" Version="3.0.1" />
+    <PackageReference Include="xunit" Version="2.3.0" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.3.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ColoursTest.Domain\ColoursTest.Domain.csproj" />
+    <ProjectReference Include="..\ColoursTest.Infrastructure\ColoursTest.Infrastructure.csproj" />
+    <ProjectReference Include="..\ColoursTest\ColoursTest.Web.csproj" />
+    <ProjectReference Include="..\TechTest.AppServices\ColoursTest.AppServices.csproj" />
   </ItemGroup>
 
 </Project>

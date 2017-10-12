@@ -4,25 +4,24 @@ using System.Security.Claims;
 using System.Security.Principal;
 using ColoursTest.Infrastructure.DTOs;
 using ColoursTest.Web.Common;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 namespace ColoursTest.Web.Controllers
 {
+    [AllowAnonymous]
     [Route("api/[controller]")]
     public class LoginController : Controller
     {
-        public LoginController(IConfiguration configuration)
-        {
-            this.Configuration = configuration;
-        }
-
-        public IConfiguration Configuration { get; }
-
         [HttpPost]
         public IActionResult Login([FromBody] LoginRequest request)
         {
+            if (!this.ModelState.IsValid)
+            {
+                return this.BadRequest(this.ModelState);
+            }
+
             if (request.Username != "username" || request.Password != "password")
             {
                 return this.BadRequest(new
