@@ -8,13 +8,6 @@ namespace ColoursTest.Tests.Shared.Comparers
 {
     public static class Comparers
     {
-        public static IEqualityComparer<IEnumerable<PersonDto>> PeopleDtoComparer()
-        {
-            return new GenericComparer<IEnumerable<PersonDto>>(
-                (x, y) => x.SequenceEqual(y, PersonDtoComparer())
-            );
-        }
-
         public static IEqualityComparer<PersonDto> PersonDtoComparer()
         {
             return new GenericComparer<PersonDto>(
@@ -25,13 +18,6 @@ namespace ColoursTest.Tests.Shared.Comparers
                 (x, y) => x.IsAuthorised == y.IsAuthorised,
                 (x, y) => x.IsValid == y.IsValid,
                 (x, y) => x.FavouriteColours.SequenceEqual(y.FavouriteColours, ColourDtoComparer())
-            );
-        }
-
-        public static IEqualityComparer<IEnumerable<ColourDto>> ColoursDtoComparer()
-        {
-            return new GenericComparer<IEnumerable<ColourDto>>(
-                (x, y) => x.SequenceEqual(y, ColourDtoComparer())
             );
         }
 

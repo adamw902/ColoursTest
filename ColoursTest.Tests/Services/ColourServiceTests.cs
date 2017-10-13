@@ -13,7 +13,7 @@ namespace ColoursTest.Tests.Services
     public class ColourServiceTests
     {
         [Fact]
-        public async void CreateColour_NullCreateUpdateColour_ThrowsArgumentNullException()
+        public async Task CreateColour_NullCreateUpdateColour_ThrowsArgumentNullException()
         {
             // Arrange
             var colourRepository = Substitute.For<IColourRepository>();
@@ -25,7 +25,7 @@ namespace ColoursTest.Tests.Services
         }
 
         [Fact]
-        public void CreateColour_ValidCreateUpdateColour_ColourIsSaved()
+        public async Task CreateColour_ValidCreateUpdateColour_ColourIsSaved()
         {
             // Arange
             var expectedColour = this.ExpectedColour;
@@ -38,14 +38,14 @@ namespace ColoursTest.Tests.Services
             var comparer = Comparers.ColourComparer();
 
             // Act
-            colourService.CreateColour(this.CreateUpdateColour).Wait();
+            await colourService.CreateColour(this.CreateUpdateColour);
 
             // Assert
-            colourRepository.Received(1).Insert(Arg.Is<Colour>(x => comparer.Equals(x, expectedColour)));
+            await colourRepository.Received(1).Insert(Arg.Is<Colour>(x => comparer.Equals(x, expectedColour)));
         }
 
         [Fact]
-        public async void CreateColour_ValidCreateUpdateColour_ReturnsValidColour()
+        public async Task CreateColour_ValidCreateUpdateColour_ReturnsValidColour()
         {
             // Arange
             var colourRepository = Substitute.For<IColourRepository>();
@@ -61,7 +61,7 @@ namespace ColoursTest.Tests.Services
         }
 
         [Fact]
-        public async void UpdateColour_NullCreateUpdateColour_ThrowsArgumentNullException()
+        public async Task UpdateColour_NullCreateUpdateColour_ThrowsArgumentNullException()
         {
             // Arange
             var colourRepository = Substitute.For<IColourRepository>();
@@ -73,7 +73,7 @@ namespace ColoursTest.Tests.Services
         }
 
         [Fact]
-        public void UpdateColour_ValidCreateUpdateColour_GetsExistingColour()
+        public async Task UpdateColour_ValidCreateUpdateColour_GetsExistingColour()
         {
             // Arange
             var colourId = 1;
@@ -84,14 +84,14 @@ namespace ColoursTest.Tests.Services
             var colourService = new ColourService(colourRepository);
 
             // Act
-            colourService.UpdateColour(colourId, this.CreateUpdateColour).Wait();
+            await colourService.UpdateColour(colourId, this.CreateUpdateColour);
 
             // Assert
-            colourRepository.Received(1).GetById(colourId);
+            await colourRepository.Received(1).GetById(colourId);
         }
 
         [Fact]
-        public async void UpdateColour_InvalidColourId_ReturnsNull()
+        public async Task UpdateColour_InvalidColourId_ReturnsNull()
         {
             // Arange
             var colourId = 9999999;
@@ -109,7 +109,7 @@ namespace ColoursTest.Tests.Services
         }
 
         [Fact]
-        public void UpdateColour_ValidCreateUpdateColour_UpdateIsCalled()
+        public async Task UpdateColour_ValidCreateUpdateColour_UpdateIsCalled()
         {
             // Arange
             var colourRepository = Substitute.For<IColourRepository>();
@@ -120,14 +120,14 @@ namespace ColoursTest.Tests.Services
             var comparer = Comparers.ColourComparer();
 
             // Act
-            colourService.UpdateColour(new int(), this.CreateUpdateColour).Wait();
+            await colourService.UpdateColour(new int(), this.CreateUpdateColour);
 
             // Assert
-            colourRepository.Update(Arg.Is<Colour>(x => comparer.Equals(x, this.ExpectedColour)));
+            await colourRepository.Update(Arg.Is<Colour>(x => comparer.Equals(x, this.ExpectedColour)));
         }
 
         [Fact]
-        public async void UpdateColour_ValidCreateUpdateColour_ValuesAreUpdated()
+        public async Task UpdateColour_ValidCreateUpdateColour_ValuesAreUpdated()
         {
             // Arange
             var colourId = 1;

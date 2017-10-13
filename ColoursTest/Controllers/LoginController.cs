@@ -39,7 +39,7 @@ namespace ColoursTest.Web.Controllers
                 RequestAt = requestAt,
                 ExpiresAt = expiresAt,
                 TokenType = TokenAuthOption.TokenType,
-                Token = token
+                Token = $"{TokenAuthOption.TokenType} {token}"
             };
 
             return this.Ok(loginSuccess);

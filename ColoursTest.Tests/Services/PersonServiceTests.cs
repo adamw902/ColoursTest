@@ -14,7 +14,7 @@ namespace ColoursTest.Tests.Services
     public class PersonServiceTests
     {
         [Fact]
-        public async void CreatePerson_NullCreateUpdatePerson_ThrowsArgumentNullException()
+        public async Task CreatePerson_NullCreateUpdatePerson_ThrowsArgumentNullException()
         {
             // Arrange
             var personRepository = Substitute.For<IPersonRepository>();
@@ -27,7 +27,7 @@ namespace ColoursTest.Tests.Services
         }
 
         [Fact]
-        public void CreatePerson_ValidCreateUpdatePerson_PersonIsSaved()
+        public async Task CreatePerson_ValidCreateUpdatePerson_PersonIsSaved()
         {
             // Arange
             var expectedPerson = this.ExpectedPerson;
@@ -43,14 +43,14 @@ namespace ColoursTest.Tests.Services
             var comparer = Comparers.PersonComparer();
 
             // Act
-            personService.CreatePerson(this.CreateUpdatePerson).Wait();
+            await personService.CreatePerson(this.CreateUpdatePerson);
 
             // Assert
-            personRepository.Received(1).Insert(Arg.Is<Person>(x => comparer.Equals(x, expectedPerson)));
+            await personRepository.Received(1).Insert(Arg.Is<Person>(x => comparer.Equals(x, expectedPerson)));
         }
 
         [Fact]
-        public void CreatePerson_ValidCreateUpdatePersonWithoutColours_ColoursAreNotRetrieved()
+        public async Task CreatePerson_ValidCreateUpdatePersonWithoutColours_ColoursAreNotRetrieved()
         {
             // Arange
             var personRepository = Substitute.For<IPersonRepository>();
@@ -62,14 +62,14 @@ namespace ColoursTest.Tests.Services
             personWithoutColours.FavouriteColours = null;
 
             // Act
-            personService.CreatePerson(personWithoutColours).Wait();
+            await personService.CreatePerson(personWithoutColours);
 
             // Assert
-            colourRepository.DidNotReceive().GetAll();
+            await colourRepository.DidNotReceive().GetAll();
         }
 
         [Fact]
-        public void CreatePerson_ValidCreateUpdatePersonWithColours_ColoursAreRetrieved()
+        public async Task CreatePerson_ValidCreateUpdatePersonWithColours_ColoursAreRetrieved()
         {
             // Arange
             var personRepository = Substitute.For<IPersonRepository>();
@@ -79,14 +79,14 @@ namespace ColoursTest.Tests.Services
             var personService = new PersonService(personRepository, colourRepository);
 
             // Act
-            personService.CreatePerson(this.CreateUpdatePerson).Wait();
+            await personService.CreatePerson(this.CreateUpdatePerson);
 
             // Assert
-            colourRepository.Received(1).GetAll();
+            await colourRepository.Received(1).GetAll();
         }
 
         [Fact]
-        public async void CreatePerson_ValidCreateUpdatePerson_ReturnsValidPerson()
+        public async Task CreatePerson_ValidCreateUpdatePerson_ReturnsValidPerson()
         {
             // Arange
             var personRepository = Substitute.For<IPersonRepository>();
@@ -105,7 +105,7 @@ namespace ColoursTest.Tests.Services
         }
 
         [Fact]
-        public async void UpdatePerson_NullCreateUpdatePerson_ThrowsArgumentNullException()
+        public async Task UpdatePerson_NullCreateUpdatePerson_ThrowsArgumentNullException()
         {
             // Arrange
             var personRepository = Substitute.For<IPersonRepository>();
@@ -118,7 +118,7 @@ namespace ColoursTest.Tests.Services
         }
 
         [Fact]
-        public void UpdatePerson_ValidCreateUpdatePerson_GetsExistingPerson()
+        public async Task UpdatePerson_ValidCreateUpdatePerson_GetsExistingPerson()
         {
             // Arange
             var personId = 1;
@@ -132,14 +132,14 @@ namespace ColoursTest.Tests.Services
             var personService = new PersonService(personRepository, colourRepository);
             
             // Act
-            personService.UpdatePerson(personId, this.CreateUpdatePerson).Wait();
+            await personService.UpdatePerson(personId, this.CreateUpdatePerson);
 
             // Assert
-            personRepository.Received(1).GetById(personId);
+            await personRepository.Received(1).GetById(personId);
         }
 
         [Fact]
-        public async void UpdatePerson_InvalidPersonId_ReturnsNull()
+        public async Task UpdatePerson_InvalidPersonId_ReturnsNull()
         {
             // Arange
             var personId = 99999999;
@@ -160,7 +160,7 @@ namespace ColoursTest.Tests.Services
         }
 
         [Fact]
-        public void UpdatePerson_ValidCreateUpdatePerson_UpdateIsCalled()
+        public async Task UpdatePerson_ValidCreateUpdatePerson_UpdateIsCalled()
         {
             // Arange
             var personRepository = Substitute.For<IPersonRepository>();
@@ -174,14 +174,14 @@ namespace ColoursTest.Tests.Services
             var comparer = Comparers.PersonComparer();
 
             // Act
-            personService.UpdatePerson(new int(), this.CreateUpdatePerson).Wait();
+            await personService.UpdatePerson(new int(), this.CreateUpdatePerson);
 
             // Assert
-            personRepository.Received(1).Update(Arg.Is<Person>(x => comparer.Equals(x, this.ExpectedPerson)));
+            await personRepository.Received(1).Update(Arg.Is<Person>(x => comparer.Equals(x, this.ExpectedPerson)));
         }
 
         [Fact]
-        public async void UpdatePerson_ValidCreateUpdatePerson_ValuesAreUpdated()
+        public async Task UpdatePerson_ValidCreateUpdatePerson_ValuesAreUpdated()
         {
             // Arange
             var personId = 1;
@@ -207,7 +207,7 @@ namespace ColoursTest.Tests.Services
         }
 
         [Fact]
-        public void UpdatePerson_ValidCreateUpdatePersonWithoutColours_ColoursAreNotUpdated()
+        public async Task UpdatePerson_ValidCreateUpdatePersonWithoutColours_ColoursAreNotUpdated()
         {
             // Arange
             var personRepository = Substitute.For<IPersonRepository>();
@@ -221,14 +221,14 @@ namespace ColoursTest.Tests.Services
             personWithoutColours.FavouriteColours = null;
 
             // Act
-            personService.UpdatePerson(new int(), personWithoutColours).Wait();
+            await personService.UpdatePerson(new int(), personWithoutColours);
 
             // Assert
-            colourRepository.DidNotReceive().GetAll();
+            await colourRepository.DidNotReceive().GetAll();
         }
 
         [Fact]
-        public void UpdatePerson_ValidCreateUpdatePersonWithColours_ColoursAreUpdated()
+        public async Task UpdatePerson_ValidCreateUpdatePersonWithColours_ColoursAreUpdated()
         {
             // Arange
             var personRepository = Substitute.For<IPersonRepository>();
@@ -240,10 +240,10 @@ namespace ColoursTest.Tests.Services
             var personService = new PersonService(personRepository, colourRepository);
             
             // Act
-            personService.UpdatePerson(new int(), this.CreateUpdatePerson).Wait();
+            await personService.UpdatePerson(new int(), this.CreateUpdatePerson);
 
             // Assert
-            colourRepository.Received(1).GetAll();
+            await colourRepository.Received(1).GetAll();
         }
 
         private CreateUpdatePerson CreateUpdatePerson { get; } =

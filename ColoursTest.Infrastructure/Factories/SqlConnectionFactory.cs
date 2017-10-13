@@ -5,7 +5,7 @@ using ColoursTest.Infrastructure.Interfaces;
 
 namespace ColoursTest.Infrastructure.Factories
 {
-    public class SqlConnectionFactory : IConnectionFactory
+    public class SqlConnectionFactory : IDbConnectionFactory
     {
         public SqlConnectionFactory(IConfiguration configuration)
         {

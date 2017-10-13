@@ -2,7 +2,7 @@
 
 namespace ColoursTest.Infrastructure.Interfaces
 {
-    public interface IConnectionFactory
+    public interface IDbConnectionFactory
     {
         IDbConnection GetConnection();
     }

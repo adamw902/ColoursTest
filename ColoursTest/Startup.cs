@@ -55,7 +55,7 @@ namespace ColoursTest.Web
             
             services.AddSingleton<IConfiguration>(Configuration);
             services.AddSingleton<ILoggerFactory, LoggerFactory>();
-            services.AddSingleton<IConnectionFactory, SqlConnectionFactory>();
+            services.AddSingleton<IDbConnectionFactory, SqlConnectionFactory>();
 
             services.AddTransient<IPersonRepository, PersonRepository>();
             services.AddTransient<IColourRepository, ColourRepository>();

@@ -1,26 +1,25 @@
 ﻿using System;
 using System.Data.SqlClient;
+using System.Threading.Tasks;
 using NSubstitute;
 using Xunit;
 using ColoursTest.Domain.Models;
 using ColoursTest.Infrastructure.Interfaces;
 using ColoursTest.Infrastructure.Repositories;
 using ColoursTest.Tests.Shared.Comparers;
+using Dapper;
 
 namespace ColoursTest.Tests.Repositories
 {
-    public class ColourRepositoryTests
+    public class ColourRepositoryTests : BaseRepositoryTest
     {
-        public ColourRepositoryTests()
-        {
-            DatabaseSetup.Setup("ColourRepositoryTestsDB");
-        }
+        public ColourRepositoryTests() : base("ColourRepositoryTestsDB") {}
 
         [Fact]
-        public async void GetAll_ReturnsCollectionOfColours()
+        public async Task GetAll_ReturnsCollectionOfColours()
         {
             // Arange
-            var connectionFactory = Substitute.For<IConnectionFactory>();
+            var connectionFactory = Substitute.For<IDbConnectionFactory>();
             connectionFactory.GetConnection().Returns(this.Connection);
 
             var colourRepository = new ColourRepository(connectionFactory);
@@ -33,10 +32,10 @@ namespace ColoursTest.Tests.Repositories
         }
 
         [Fact]
-        public async void GetById_IncorrectColourId_ReturnsNull()
+        public async Task GetById_IncorrectColourId_ReturnsNull()
         {
             // Arange
-            var connectionFactory = Substitute.For<IConnectionFactory>();
+            var connectionFactory = Substitute.For<IDbConnectionFactory>();
             connectionFactory.GetConnection().Returns(this.Connection);
 
             var colourRepository = new ColourRepository(connectionFactory);
@@ -49,10 +48,10 @@ namespace ColoursTest.Tests.Repositories
         }
 
         [Fact]
-        public async void GetById_CorrectColourId_ReturnsCorrectColour()
+        public async Task GetById_CorrectColourId_ReturnsCorrectColour()
         {
             // Arange
-            var connectionFactory = Substitute.For<IConnectionFactory>();
+            var connectionFactory = Substitute.For<IDbConnectionFactory>();
             connectionFactory.GetConnection().Returns(this.Connection);
 
             var colourRepository = new ColourRepository(connectionFactory);
@@ -65,10 +64,10 @@ namespace ColoursTest.Tests.Repositories
         }
 
         [Fact]
-        public async void Insert_NullColour_ThrowsArgumentNullException()
+        public async Task Insert_NullColour_ThrowsArgumentNullException()
         {
             // Arange
-            var connectionFactory = Substitute.For<IConnectionFactory>();
+            var connectionFactory = Substitute.For<IDbConnectionFactory>();
 
             var colourRepository = new ColourRepository(connectionFactory);
 
@@ -77,10 +76,10 @@ namespace ColoursTest.Tests.Repositories
         }
 
         [Fact]
-        public async void Insert_ValidColour_ReturnsColourWithColourId()
+        public async Task Insert_ValidColour_ReturnsColourWithColourId()
         {
             // Arange
-            var connectionFactory = Substitute.For<IConnectionFactory>();
+            var connectionFactory = Substitute.For<IDbConnectionFactory>();
             connectionFactory.GetConnection().Returns(this.Connection);
 
             var colourRepository = new ColourRepository(connectionFactory);
@@ -93,27 +92,33 @@ namespace ColoursTest.Tests.Repositories
         }
 
         [Fact]
-        public async void Insert_ValidColour_InsertsColourSuccessfully()
+        public async Task Insert_ValidColour_InsertsColourSuccessfully()
         {
             // Arange
-            var connectionFactory = Substitute.For<IConnectionFactory>();
+            var connectionFactory = Substitute.For<IDbConnectionFactory>();
             connectionFactory.GetConnection().Returns(x => this.Connection);
 
             var colourRepository = new ColourRepository(connectionFactory);
 
             // Act
             var colour = await colourRepository.Insert(this.ColourToInsert);
-            var persistedColour = await colourRepository.GetById(colour.ColourId);
-            
+
+            Colour persistedColour;
+            using (var connection = connectionFactory.GetConnection())
+            {
+                var getById = $"SELECT * FROM [Colours] WHERE ColourId = {colour.ColourId}";
+                persistedColour = await connection.QuerySingleOrDefaultAsync<Colour>(getById);
+            }
+
             // Assert
             Assert.NotNull(persistedColour);
         }
 
         [Fact]
-        public async void Update_NullColour_ThrowsArgumentNullException()
+        public async Task Update_NullColour_ThrowsArgumentNullException()
         {
             // Arange
-            var connectionFactory = Substitute.For<IConnectionFactory>();
+            var connectionFactory = Substitute.For<IDbConnectionFactory>();
 
             var colourRepository = new ColourRepository(connectionFactory);
 
@@ -122,10 +127,10 @@ namespace ColoursTest.Tests.Repositories
         }
 
         [Fact]
-        public async void Update_InvalidColourId_ThrowsArgumentNullException()
+        public async Task Update_InvalidColourId_ThrowsArgumentNullException()
         {
             // Arange
-            var connectionFactory = Substitute.For<IConnectionFactory>();
+            var connectionFactory = Substitute.For<IDbConnectionFactory>();
 
             var colourRepository = new ColourRepository(connectionFactory);
 
@@ -134,10 +139,10 @@ namespace ColoursTest.Tests.Repositories
         }
 
         [Fact]
-        public async void Update_ValidColour_UpdatesSuccessfully()
+        public async Task Update_ValidColour_UpdatesSuccessfully()
         {
             // Arange
-            var connectionFactory = Substitute.For<IConnectionFactory>();
+            var connectionFactory = Substitute.For<IDbConnectionFactory>();
             connectionFactory.GetConnection().Returns(x => this.Connection);
 
             var colourRepository = new ColourRepository(connectionFactory);
@@ -146,15 +151,19 @@ namespace ColoursTest.Tests.Repositories
             colourToUpdate.IsEnabled = false;
 
             // Act
-            colourRepository.Update(colourToUpdate).Wait();
-            var colour = await colourRepository.GetById(colourToUpdate.ColourId);
+            await colourRepository.Update(colourToUpdate);
+            
+            Colour colour;
+            using (var connection = connectionFactory.GetConnection())
+            {
+                var getById = $"SELECT * FROM [Colours] WHERE ColourId = {colourToUpdate.ColourId}";
+                colour = await connection.QuerySingleOrDefaultAsync<Colour>(getById);
+            }
 
             // Assert
             Assert.Equal(colourToUpdate, colour, Comparers.ColourComparer());
         }
-
-        private SqlConnection Connection => new SqlConnection("data source=localhost;initial catalog=ColourRepositoryTestsDB;integrated security=true;");
-
+        
         private Colour ColourToInsert => new Colour(0, "Test", true);
         private Colour ExpectedColour => new Colour(1, "Red", true);
     }

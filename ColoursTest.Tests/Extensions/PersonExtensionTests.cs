@@ -51,7 +51,7 @@ namespace ColoursTest.Tests.Extensions
             var peopleDto = people.ToPersonDto();
 
             // Assert
-            Assert.Equal(expectedPeopleDto, peopleDto, Comparers.PeopleDtoComparer());
+            Assert.Equal(expectedPeopleDto, peopleDto, Comparers.PersonDtoComparer());
         }
 
         private Person Person { get; } =

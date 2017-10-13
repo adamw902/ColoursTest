@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using ColoursTest.Domain.Models;
 
 namespace ColoursTest.Infrastructure.DTOs
 {

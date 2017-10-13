@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
-using ColoursTest.Domain.Exceptions;
 using ColoursTest.Domain.Interfaces;
 using ColoursTest.Domain.Models;
 using ColoursTest.Infrastructure.Interfaces;
@@ -13,16 +12,16 @@ namespace ColoursTest.Infrastructure.Repositories
 {
     public class PersonRepository : IPersonRepository
     {
-        public PersonRepository(IConnectionFactory connectionFactory)
+        public PersonRepository(IDbConnectionFactory dbConnectionFactory)
         {
-            this.ConnectionFactory = connectionFactory;
+            this.DbConnectionFactory = dbConnectionFactory;
         }
 
-        private IConnectionFactory ConnectionFactory { get; }
+        private IDbConnectionFactory DbConnectionFactory { get; }
 
         public async Task<IEnumerable<Person>> GetAll()
         {
-            using (var connection = this.ConnectionFactory.GetConnection())
+            using (var connection = this.DbConnectionFactory.GetConnection())
             {
                 var selectPeopleAndColours = @"
                             SELECT P.*, 
@@ -54,7 +53,7 @@ namespace ColoursTest.Infrastructure.Repositories
 
         public async Task<Person> GetById(int personId)
         {
-            using (var connection = this.ConnectionFactory.GetConnection())
+            using (var connection = this.DbConnectionFactory.GetConnection())
             {
                 var selectPerson = "SELECT * FROM [People] WHERE PersonId = @PersonId;";
                 var person = (await connection.QueryAsync<Person>(selectPerson, new {PersonId = personId.ToString()})).SingleOrDefault();
@@ -85,7 +84,7 @@ namespace ColoursTest.Infrastructure.Repositories
                 throw new ArgumentNullException(nameof(person), "Can't create null person.");
             }
 
-            using (var connection = this.ConnectionFactory.GetConnection())
+            using (var connection = this.DbConnectionFactory.GetConnection())
             {
                 connection.Open();
                 using (var transaction = connection.BeginTransaction())
@@ -117,7 +116,7 @@ namespace ColoursTest.Infrastructure.Repositories
                 throw new ArgumentNullException(nameof(person), "Can't update null person.");
             }
 
-            using (var connection = this.ConnectionFactory.GetConnection())
+            using (var connection = this.DbConnectionFactory.GetConnection())
             {
                 connection.Open();
 

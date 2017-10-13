@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using ColoursTest.Domain.Interfaces;
 using ColoursTest.Domain.Models;
@@ -11,16 +10,16 @@ namespace ColoursTest.Infrastructure.Repositories
 {
     public class ColourRepository : IColourRepository
     {
-        public ColourRepository(IConnectionFactory connectionFactory)
+        public ColourRepository(IDbConnectionFactory dbConnectionFactory)
         {
-            this.ConnectionFactory = connectionFactory;
+            this.DbConnectionFactory = dbConnectionFactory;
         }
 
-        private IConnectionFactory ConnectionFactory { get; }
+        private IDbConnectionFactory DbConnectionFactory { get; }
 
         public async Task<IEnumerable<Colour>> GetAll()
         {
-            using (var connection = this.ConnectionFactory.GetConnection())
+            using (var connection = this.DbConnectionFactory.GetConnection())
             {
                 return await connection.QueryAsync<Colour>("SELECT * FROM [Colours];");
             }
@@ -28,7 +27,7 @@ namespace ColoursTest.Infrastructure.Repositories
 
         public async Task<Colour> GetById(int colourId)
         {
-            using (var connection = this.ConnectionFactory.GetConnection())
+            using (var connection = this.DbConnectionFactory.GetConnection())
             {
                 var selectColour = "SELECT * FROM [Colours] WHERE ColourId = @ColourId;";
                 return await connection.QuerySingleOrDefaultAsync<Colour>(selectColour, new {ColourId = colourId});
@@ -42,7 +41,7 @@ namespace ColoursTest.Infrastructure.Repositories
                 throw new ArgumentNullException(nameof(colour), "Can't create null colour.");
             }
 
-            using (var connection = this.ConnectionFactory.GetConnection())
+            using (var connection = this.DbConnectionFactory.GetConnection())
             {
                 var insertColour = @"INSERT INTO [Colours] (Name, IsEnabled) VALUES (@Name, @IsEnabled);
                                      SELECT CAST(SCOPE_IDENTITY() as int);";
@@ -58,7 +57,7 @@ namespace ColoursTest.Infrastructure.Repositories
                 throw new ArgumentNullException(nameof(colour), "Can't update null colour.");
             }
 
-            using (var connection = this.ConnectionFactory.GetConnection())
+            using (var connection = this.DbConnectionFactory.GetConnection())
             {
                 var updateColour = @"
                         UPDATE [Colours]

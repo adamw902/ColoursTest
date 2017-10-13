@@ -50,7 +50,7 @@ namespace ColoursTest.Tests.Extensions
             var coloursDto = colours.ToColourDto();
 
             // Assert
-            Assert.Equal(expectedColoursDto, coloursDto, Comparers.ColoursDtoComparer());
+            Assert.Equal(expectedColoursDto, coloursDto, Comparers.ColourDtoComparer());
         }
 
         private Colour Colour { get; } = new Colour(1, "Test", true);

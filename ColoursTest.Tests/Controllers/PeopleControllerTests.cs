@@ -32,7 +32,7 @@ namespace ColoursTest.Tests.Controllers
         }
 
         [Fact]
-        public async void GetAll_ReturnsOkWithCollectionOfPersonDtos()
+        public async Task GetAll_ReturnsOkWithCollectionOfPersonDtos()
         {
             // Arange
             var people = new List<Person>
@@ -64,11 +64,11 @@ namespace ColoursTest.Tests.Controllers
             Assert.IsType<List<PersonDto>>(okObjectResult.Value);
 
             var peopleDto = (IEnumerable<PersonDto>)okObjectResult.Value;
-            Assert.Equal(expectedPeopleDto, peopleDto, Comparers.PeopleDtoComparer());
+            Assert.Equal(expectedPeopleDto, peopleDto, Comparers.PersonDtoComparer());
         }
 
         [Fact]
-        public void GetOne_RetrievesPerson()
+        public async Task GetOne_RetrievesPerson()
         {
             // Arange
             var PersonId = 1;
@@ -80,14 +80,14 @@ namespace ColoursTest.Tests.Controllers
             var peopleController = new PeopleController(personRepository, personService);
 
             // Act
-            peopleController.Get(PersonId).Wait();
+            await peopleController.Get(PersonId);
 
             // Assert
-            personRepository.Received(1).GetById(PersonId);
+            await personRepository.Received(1).GetById(PersonId);
         }
 
         [Fact]
-        public async void GetOne_IncorrectPersonId_ReturnsNotFound()
+        public async Task GetOne_IncorrectPersonId_ReturnsNotFound()
         {
             // Arange
             var personRepository = Substitute.For<IPersonRepository>();
@@ -105,7 +105,7 @@ namespace ColoursTest.Tests.Controllers
         }
 
         [Fact]
-        public async void GetOne_ValidPersonId_ReturnsOkWithPersonDto()
+        public async Task GetOne_ValidPersonId_ReturnsOkWithPersonDto()
         {
             // Arange
             var personRepository = Substitute.For<IPersonRepository>();
@@ -129,7 +129,7 @@ namespace ColoursTest.Tests.Controllers
         }
 
         [Fact]
-        public async void Post_InvalidRequestModel_ReturnsBadRequest()
+        public async Task Post_InvalidRequestModel_ReturnsBadRequest()
         {
             // Arange
             var personRepository = Substitute.For<IPersonRepository>();
@@ -147,7 +147,7 @@ namespace ColoursTest.Tests.Controllers
         }
 
         [Fact]
-        public void Post_ValidRequestModel_CallsCreatePerson()
+        public async Task Post_ValidRequestModel_CallsCreatePerson()
         {
             // Arange
             var personRepository = Substitute.For<IPersonRepository>();
@@ -161,14 +161,14 @@ namespace ColoursTest.Tests.Controllers
             var comparer = Comparers.CreateUpdatePersonComparer();
 
             // Act
-            peopleController.Post(this.CreateUpdatePerson).Wait();
+            await peopleController.Post(this.CreateUpdatePerson);
 
             // Assert
-            personService.Received(1).CreatePerson(Arg.Is<CreateUpdatePerson>(x => comparer.Equals(x, this.CreateUpdatePerson)));
+            await personService.Received(1).CreatePerson(Arg.Is<CreateUpdatePerson>(x => comparer.Equals(x, this.CreateUpdatePerson)));
         }
 
         [Fact]
-        public async void Post_ValidRequestModel_ReturnsOkWithPersonDto()
+        public async Task Post_ValidRequestModel_ReturnsOkWithPersonDto()
         {
             // Arange
             var personRepository = Substitute.For<IPersonRepository>();
@@ -192,7 +192,7 @@ namespace ColoursTest.Tests.Controllers
         }
 
         [Fact]
-        public void Put_CallsUpdatePerson()
+        public async Task Put_CallsUpdatePerson()
         {
             // Arange
             var PersonId = 1;
@@ -206,16 +206,16 @@ namespace ColoursTest.Tests.Controllers
             var comparer = Comparers.CreateUpdatePersonComparer();
 
             // Act
-            peopleController.Put(PersonId, this.CreateUpdatePerson).Wait();
+            await peopleController.Put(PersonId, this.CreateUpdatePerson);
 
             // Assert
-            personService.Received(1)
-                .UpdatePerson(PersonId,
-                    Arg.Is<CreateUpdatePerson>(x => comparer.Equals(x, this.CreateUpdatePerson)));
+            await personService.Received(1)
+                    .UpdatePerson(PersonId,
+                        Arg.Is<CreateUpdatePerson>(x => comparer.Equals(x, this.CreateUpdatePerson)));
         }
 
         [Fact]
-        public async void Put_InvalidPersonId_ReturnsNotFound()
+        public async Task Put_InvalidPersonId_ReturnsNotFound()
         {
             // Arange
             var personRepository = Substitute.For<IPersonRepository>();
@@ -234,7 +234,7 @@ namespace ColoursTest.Tests.Controllers
         }
 
         [Fact]
-        public async void Put_ValidRequest_ReturnsOkWithPersonDto()
+        public async Task Put_ValidRequest_ReturnsOkWithPersonDto()
         {
             // Arange
             var personRepository = Substitute.For<IPersonRepository>();

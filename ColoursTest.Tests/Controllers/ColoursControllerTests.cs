@@ -32,7 +32,7 @@ namespace ColoursTest.Tests.Controllers
         }
 
         [Fact]
-        public async void GetAll_ReturnsOkWithCollectionOfColourDtos()
+        public async Task GetAll_ReturnsOkWithCollectionOfColourDtos()
         {
             // Arange
             var colours = new List<Colour>
@@ -64,11 +64,11 @@ namespace ColoursTest.Tests.Controllers
             Assert.IsType<List<ColourDto>>(okObjectResult.Value);
 
             var coloursDto = (IEnumerable<ColourDto>) okObjectResult.Value;
-            Assert.Equal(expectedColoursDto, coloursDto, Comparers.ColoursDtoComparer());
+            Assert.Equal(expectedColoursDto, coloursDto, Comparers.ColourDtoComparer());
         }
 
         [Fact]
-        public void GetOne_RetrievesColour()
+        public async Task GetOne_RetrievesColour()
         {
             // Arange
             var colourId = 1;
@@ -80,14 +80,14 @@ namespace ColoursTest.Tests.Controllers
             var coloursController = new ColoursController(colourRepository, colourService);
 
             // Act
-            coloursController.Get(colourId).Wait();
+            await coloursController.Get(colourId);
 
             // Assert
-            colourRepository.Received(1).GetById(colourId);
+            await colourRepository.Received(1).GetById(colourId);
         }
 
         [Fact]
-        public async void GetOne_IncorrectColourId_ReturnsNotFound()
+        public async Task GetOne_IncorrectColourId_ReturnsNotFound()
         {
             // Arange
             var colourRepository = Substitute.For<IColourRepository>();
@@ -105,7 +105,7 @@ namespace ColoursTest.Tests.Controllers
         }
 
         [Fact]
-        public async void GetOne_ValidColourId_ReturnsOkWithColourDto()
+        public async Task GetOne_ValidColourId_ReturnsOkWithColourDto()
         {
             // Arange
             var colourRepository = Substitute.For<IColourRepository>();
@@ -129,7 +129,7 @@ namespace ColoursTest.Tests.Controllers
         }
 
         [Fact]
-        public async void Post_InvalidRequestModel_ReturnsBadRequest()
+        public async Task Post_InvalidRequestModel_ReturnsBadRequest()
         {
             // Arange
             var colourRepository = Substitute.For<IColourRepository>();
@@ -147,7 +147,7 @@ namespace ColoursTest.Tests.Controllers
         }
 
         [Fact]
-        public void Post_ValidRequestModel_CallsCreateColour()
+        public async Task Post_ValidRequestModel_CallsCreateColour()
         {
             // Arange
             var colourRepository = Substitute.For<IColourRepository>();
@@ -160,14 +160,14 @@ namespace ColoursTest.Tests.Controllers
             var comparer = Comparers.CreateUpdateColourComparer();
 
             // Act
-            colourController.Post(this.CreateUpdateColour).Wait();
+            await colourController.Post(this.CreateUpdateColour);
 
             // Assert
-            colourService.Received(1).CreateColour(Arg.Is<CreateUpdateColour>(x => comparer.Equals(x, this.CreateUpdateColour)));
+            await colourService.Received(1).CreateColour(Arg.Is<CreateUpdateColour>(x => comparer.Equals(x, this.CreateUpdateColour)));
         }
 
         [Fact]
-        public async void Post_ValidRequestModel_ReturnsOkWithColourDto()
+        public async Task Post_ValidRequestModel_ReturnsOkWithColourDto()
         {
             // Arange
             var colourRepository = Substitute.For<IColourRepository>();
@@ -191,7 +191,7 @@ namespace ColoursTest.Tests.Controllers
         }
 
         [Fact]
-        public void Put_CallsUpdateColour()
+        public async Task Put_CallsUpdateColour()
         {
             // Arange
             var colourId = 1;
@@ -205,16 +205,16 @@ namespace ColoursTest.Tests.Controllers
             var comparer = Comparers.CreateUpdateColourComparer();
 
             // Act
-            colourController.Put(colourId, this.CreateUpdateColour).Wait();
+            await colourController.Put(colourId, this.CreateUpdateColour);
 
             // Assert
-            colourService.Received(1)
-                .UpdateColour(colourId,
-                    Arg.Is<CreateUpdateColour>(x => comparer.Equals(x, this.CreateUpdateColour)));
+            await colourService.Received(1)
+                    .UpdateColour(colourId,
+                        Arg.Is<CreateUpdateColour>(x => comparer.Equals(x, this.CreateUpdateColour)));
         }
 
         [Fact]
-        public async void Put_InvalidColourId_ReturnsNotFound()
+        public async Task Put_InvalidColourId_ReturnsNotFound()
         {
             // Arange
             var colourRepository = Substitute.For<IColourRepository>();
@@ -233,7 +233,7 @@ namespace ColoursTest.Tests.Controllers
         }
 
         [Fact]
-        public async void Put_ValidRequest_ReturnsOkWithColourDto()
+        public async Task Put_ValidRequest_ReturnsOkWithColourDto()
         {
             // Arange
             var colourRepository = Substitute.For<IColourRepository>();
