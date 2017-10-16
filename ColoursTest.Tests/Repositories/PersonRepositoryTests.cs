@@ -5,22 +5,20 @@ using ColoursTest.Domain.Models;
 using ColoursTest.Infrastructure.Interfaces;
 using ColoursTest.Infrastructure.Repositories;
 using ColoursTest.Tests.Shared.Comparers;
-using Dapper;
+using MongoDB.Driver;
 using NSubstitute;
 using Xunit;
 
 namespace ColoursTest.Tests.Repositories
 {
-    public class PersonRepositoryTests : BaseRepositoryTest
+    public class PersonRepositoryTests : BaseRepositoryTest<PersonRepositoryTests>
     {
-        public PersonRepositoryTests() : base("PersonRepositoryTestsDB"){}
-
         [Fact]
         public async Task GetAll_ReturnsCollectionOfPeople()
         {
             // Arange
-            var connectionFactory = Substitute.For<IDbConnectionFactory>();
-            connectionFactory.GetConnection().Returns(this.Connection);
+            var connectionFactory = Substitute.For<IMongoConnectionFactory>();
+            connectionFactory.GetDatabase().Returns(x => this.Database);
 
             var personRepository = new PersonRepository(connectionFactory);
 
@@ -35,13 +33,13 @@ namespace ColoursTest.Tests.Repositories
         public async Task GetById_IncorrectPersonId_ReturnsNull()
         {
             // Arange
-            var connectionFactory = Substitute.For<IDbConnectionFactory>();
-            connectionFactory.GetConnection().Returns(this.Connection);
+            var connectionFactory = Substitute.For<IMongoConnectionFactory>();
+            connectionFactory.GetDatabase().Returns(x => this.Database);
 
             var personRepository = new PersonRepository(connectionFactory);
 
             // Act
-            var colour = await personRepository.GetById(new int());
+            var colour = await personRepository.GetById(Guid.Empty);
 
             // Assert
             Assert.Null(colour);
@@ -51,13 +49,13 @@ namespace ColoursTest.Tests.Repositories
         public async Task GetById_ValidPersonId_ReturnsCorrectPerson()
         {
             // Arange
-            var connectionFactory = Substitute.For<IDbConnectionFactory>();
-            connectionFactory.GetConnection().Returns(this.Connection);
+            var connectionFactory = Substitute.For<IMongoConnectionFactory>();
+            connectionFactory.GetDatabase().Returns(x => this.Database);
 
             var personRepository = new PersonRepository(connectionFactory);
 
             // Act
-            var person = await personRepository.GetById(this.ExpectedPerson.PersonId);
+            var person = await personRepository.GetById(this.ExpectedPerson.Id);
 
             // Assert
             Assert.Equal(this.ExpectedPerson, person, Comparers.PersonComparer());
@@ -67,7 +65,7 @@ namespace ColoursTest.Tests.Repositories
         public async Task Insert_NullPerson_ThrowsArgumentNullException()
         {
             // Arange
-            var connectionFactory = Substitute.For<IDbConnectionFactory>();
+            var connectionFactory = Substitute.For<IMongoConnectionFactory>();
 
             var personRepository = new PersonRepository(connectionFactory);
 
@@ -76,50 +74,30 @@ namespace ColoursTest.Tests.Repositories
         }
 
         [Fact]
-        public async Task Insert_ValidPerson_ReturnsPersonWithPersonId()
+        public async Task Insert_ValidPerson_InsertsPersonSuccessfully()
         {
             // Arange
-            var connectionFactory = Substitute.For<IDbConnectionFactory>();
-            connectionFactory.GetConnection().Returns(this.Connection);
+            var connectionFactory = Substitute.For<IMongoConnectionFactory>();
+            connectionFactory.GetDatabase().Returns(x => this.Database);
 
             var personRepository = new PersonRepository(connectionFactory);
 
             // Act
-            var person = await personRepository.Insert(this.PersonToInsert);
+            await personRepository.Insert(this.PersonToInsert);
 
-            // Assert
-            Assert.NotEqual(0, person.PersonId);
-        }
-
-        [Fact]
-        public async Task Insert_ValidPerson_InsertsPersonAndColoursSuccessfully()
-        {
-            // Arange
-            var connectionFactory = Substitute.For<IDbConnectionFactory>();
-            connectionFactory.GetConnection().Returns(x => this.Connection);
-
-            var personRepository = new PersonRepository(connectionFactory);
-
-            // Act
-            var person = await personRepository.Insert(this.PersonToInsert);
-
-            Person persistedPerson;
-            using (var connection = connectionFactory.GetConnection())
-            {
-                var getById = $"SELECT * FROM [People] WHERE PersonId = {person.PersonId}";
-                persistedPerson = await connection.QuerySingleOrDefaultAsync<Person>(getById);
-            }
+            var filter = Builders<Person>.Filter.Eq("Id", this.PersonToInsert.Id);
+            var persistedPerson = await this.Database.GetCollection<Person>("people").Find(filter).SingleOrDefaultAsync();
 
             // Assert
             Assert.NotNull(persistedPerson);
-            Assert.Equal(this.PersonToInsert.FavouriteColours, persistedPerson.FavouriteColours, Comparers.ColoursComparer());
         }
 
         [Fact]
         public async Task Update_NullPerson_ThrowsArgumentNullException()
         {
             // Arange
-            var connectionFactory = Substitute.For<IDbConnectionFactory>();
+            var connectionFactory = Substitute.For<IMongoConnectionFactory>();
+            connectionFactory.GetDatabase().Returns(x => this.Database);
 
             var personRepository = new PersonRepository(connectionFactory);
 
@@ -131,9 +109,12 @@ namespace ColoursTest.Tests.Repositories
         public async Task Update_InvalidPersonId_ThrowsArgumentNullException()
         {
             // Arange
-            var connectionFactory = Substitute.For<IDbConnectionFactory>();
+            var connectionFactory = Substitute.For<IMongoConnectionFactory>();
 
             var personRepository = new PersonRepository(connectionFactory);
+
+            var invalidPerson = this.PersonToInsert;
+            invalidPerson.Id = Guid.Empty;
 
             // Assert
             await Assert.ThrowsAsync<ArgumentNullException>(() => personRepository.Update(this.PersonToInsert));
@@ -143,8 +124,8 @@ namespace ColoursTest.Tests.Repositories
         public async Task Update_ValidPerson_UpdatesPersonSuccessfully()
         {
             // Arange
-            var connectionFactory = Substitute.For<IDbConnectionFactory>();
-            connectionFactory.GetConnection().Returns(x => this.Connection);
+            var connectionFactory = Substitute.For<IMongoConnectionFactory>();
+            connectionFactory.GetDatabase().Returns(x => this.Database);
 
             var personRepository = new PersonRepository(connectionFactory);
 
@@ -154,59 +135,29 @@ namespace ColoursTest.Tests.Repositories
             // Act
             await personRepository.Update(personToUpdate);
 
-            Person person;
-            using (var connection = connectionFactory.GetConnection())
-            {
-                var getById = $"SELECT * FROM [People] WHERE PersonId = {personToUpdate.PersonId}";
-                person = await connection.QuerySingleOrDefaultAsync<Person>(getById);
-            }
+            var filter = Builders<Person>.Filter.Eq("Id", personToUpdate.Id);
+            var person = await this.Database.GetCollection<Person>("people").Find(filter).SingleOrDefaultAsync();
 
             // Assert
             Assert.Equal(personToUpdate, person, Comparers.PersonComparer());
         }
 
-        [Fact]
-        public async Task Update_ValidPerson_UpdatesFavouriteColoursSuccessfully()
-        {
-            // Arange
-            var connectionFactory = Substitute.For<IDbConnectionFactory>();
-            connectionFactory.GetConnection().Returns(x => this.Connection);
-
-            var personRepository = new PersonRepository(connectionFactory);
-
-            var personToUpdate = this.ExpectedPerson;
-            personToUpdate.FavouriteColours.Add(new Colour(3, "Blue", true));
-
-            // Act
-            await personRepository.Update(personToUpdate);
-
-            Person person;
-            using (var connection = connectionFactory.GetConnection())
-            {
-                var getById = $"SELECT * FROM [People] WHERE PersonId = {personToUpdate.PersonId}";
-                person = await connection.QuerySingleOrDefaultAsync<Person>(getById);
-            }
-
-            // Assert
-            Assert.Equal(personToUpdate.FavouriteColours, person.FavouriteColours, Comparers.ColoursComparer());
-        }
-
         private Person PersonToInsert { get; } = 
-            new Person(0, "Inserted", "Person", true, true, true)
+            new Person(Guid.Parse("4F4E0E5B-ECB7-44DE-B33C-0A65949C81E7"), "Inserted", "Person", true, true, true)
             {
                 FavouriteColours = new List<Colour>
                 {
-                    new Colour(3, "Blue", true)
+                    new Colour(Guid.Parse("439FFD3C-B37D-40BB-9A9E-A48838C1AF23"), "Blue", true)
                 }
             };
 
         private Person ExpectedPerson { get; } =
-            new Person(1, "Test", "1", true, true, true)
+            new Person(Guid.Parse("51724787-A908-45CD-ABAA-EF4DA771F9EE"), "Test", "1", true, true, true)
             {
                 FavouriteColours = new List<Colour>
                 {
-                    new Colour(1, "Red", true),
-                    new Colour(2, "Green", true)
+                    new Colour(Guid.Parse("5B42FFD4-31E0-40C7-8CD3-442E485577AF"), "Red", true),
+                    new Colour(Guid.Parse("95D03170-349C-4003-B131-661526C8BD06"), "Green", true)
                 }
             };
     }

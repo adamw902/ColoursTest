@@ -14,6 +14,6 @@ namespace ColoursTest.Infrastructure.DTOs
         public bool? IsAuthorised { get; set; }
         public bool? IsValid { get; set; }
         public bool? IsEnabled { get; set; }
-        public List<int> FavouriteColours { get; set; }
+        public List<string> FavouriteColours { get; set; }
     }
 }

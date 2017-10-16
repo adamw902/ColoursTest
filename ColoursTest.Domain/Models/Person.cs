@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using ColoursTest.Domain.Interfaces;
 
 namespace ColoursTest.Domain.Models
 {
-    public class Person
+    public class Person : IEntity
     {
-        public Person(int personId, string firstName, string lastName, bool isAuthorised, bool isValid, bool isEnabled)
+        public Person(Guid id, string firstName, string lastName, bool isAuthorised, bool isValid, bool isEnabled)
         {
-            this.PersonId = personId;
+            this.Id = id;
             this.FirstName = firstName;
             this.LastName = lastName;
             this.IsAuthorised = isAuthorised;
@@ -15,7 +16,7 @@ namespace ColoursTest.Domain.Models
             this.IsEnabled = isEnabled;
         }
 
-        public int PersonId { get; set; }
+        public Guid Id { get; set; }
 
         public string FirstName { get; set; }
 

@@ -3,35 +3,30 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using ColoursTest.Domain.Interfaces;
 using ColoursTest.Domain.Models;
+using ColoursTest.Infrastructure.Extensions;
 using ColoursTest.Infrastructure.Interfaces;
-using Dapper;
+using MongoDB.Driver;
 
 namespace ColoursTest.Infrastructure.Repositories
 {
     public class ColourRepository : IColourRepository
     {
-        public ColourRepository(IDbConnectionFactory dbConnectionFactory)
+        public ColourRepository(IMongoConnectionFactory mongoConnectionFactory)
         {
-            this.DbConnectionFactory = dbConnectionFactory;
+            this.Database = mongoConnectionFactory.GetDatabase();
         }
 
-        private IDbConnectionFactory DbConnectionFactory { get; }
+        private IMongoDatabase Database { get; }
 
         public async Task<IEnumerable<Colour>> GetAll()
         {
-            using (var connection = this.DbConnectionFactory.GetConnection())
-            {
-                return await connection.QueryAsync<Colour>("SELECT * FROM [Colours];");
-            }
+            return await this.Database.GetCollection<Colour>("colours").Find(Builders<Colour>.Filter.Empty).ToListAsync();
         }
 
-        public async Task<Colour> GetById(int colourId)
+        public Task<Colour> GetById(Guid id)
         {
-            using (var connection = this.DbConnectionFactory.GetConnection())
-            {
-                var selectColour = "SELECT * FROM [Colours] WHERE ColourId = @ColourId;";
-                return await connection.QuerySingleOrDefaultAsync<Colour>(selectColour, new {ColourId = colourId});
-            }
+            var filter = Builders<Colour>.Filter.Eq("Id", id);
+            return this.Database.GetCollection<Colour>("colours").Find(filter).FirstOrDefaultAsync();
         }
 
         public async Task<Colour> Insert(Colour colour)
@@ -41,34 +36,21 @@ namespace ColoursTest.Infrastructure.Repositories
                 throw new ArgumentNullException(nameof(colour), "Can't create null colour.");
             }
 
-            using (var connection = this.DbConnectionFactory.GetConnection())
-            {
-                var insertColour = @"INSERT INTO [Colours] (Name, IsEnabled) VALUES (@Name, @IsEnabled);
-                                     SELECT CAST(SCOPE_IDENTITY() as int);";
-                colour.ColourId = await connection.QuerySingleAsync<int>(insertColour, colour);
-                return colour;
-            }
+            colour.Id = await this.Database.GetCollection<Colour>("colours").Insert(colour);
+
+            return colour;
         }
 
-        public async Task<Colour> Update(Colour colour)
+        public Task Update(Colour colour)
         {
-            if (colour == null || colour.ColourId == 0)
+            if (colour == null || colour.Id == Guid.Empty)
             {
                 throw new ArgumentNullException(nameof(colour), "Can't update null colour.");
             }
 
-            using (var connection = this.DbConnectionFactory.GetConnection())
-            {
-                var updateColour = @"
-                        UPDATE [Colours]
-                           SET Name = @Name, 
-                               IsEnabled = @IsEnabled
-                         WHERE ColourId = @ColourId;";
+            var filter = Builders<Colour>.Filter.Eq(s => s.Id, colour.Id);
 
-                await connection.ExecuteAsync(updateColour, colour);
-            }
-
-            return colour;
+            return this.Database.GetCollection<Colour>("colours").ReplaceOneAsync(filter, colour);
         }
     }
 }

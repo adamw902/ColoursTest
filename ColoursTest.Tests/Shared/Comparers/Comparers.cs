@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using ColoursTest.Domain.Models;
@@ -40,7 +41,16 @@ namespace ColoursTest.Tests.Shared.Comparers
         public static IEqualityComparer<Colour> ColourComparer()
         {
             return new GenericComparer<Colour>(
-                (x, y) => x.ColourId == y.ColourId,
+                (x, y) => x.Id == y.Id,
+                (x, y) => string.Equals(x.Name, y.Name),
+                (x, y) => x.IsEnabled == y.IsEnabled
+            );
+        }
+
+        public static IEqualityComparer<Colour> ColourWithNewIdComparer()
+        {
+            return new GenericComparer<Colour>(
+                (x, y) => x.Id != Guid.Empty,
                 (x, y) => string.Equals(x.Name, y.Name),
                 (x, y) => x.IsEnabled == y.IsEnabled
             );
@@ -49,7 +59,20 @@ namespace ColoursTest.Tests.Shared.Comparers
         public static IEqualityComparer<Person> PersonComparer()
         {
             return new GenericComparer<Person>(
-                (x, y) => x.PersonId == y.PersonId,
+                (x, y) => x.Id == y.Id,
+                (x, y) => string.Equals(x.FirstName, y.FirstName),
+                (x, y) => string.Equals(x.LastName, y.LastName),
+                (x, y) => x.IsEnabled == y.IsEnabled,
+                (x, y) => x.IsAuthorised == y.IsAuthorised,
+                (x, y) => x.IsValid == y.IsValid,
+                (x, y) => x.FavouriteColours.SequenceEqual(y.FavouriteColours, ColourComparer())
+            );
+        }
+
+        public static IEqualityComparer<Person> PersonWithNewIdComparer()
+        {
+            return new GenericComparer<Person>(
+                (x, y) => x.Id != Guid.Empty,
                 (x, y) => string.Equals(x.FirstName, y.FirstName),
                 (x, y) => string.Equals(x.LastName, y.LastName),
                 (x, y) => x.IsEnabled == y.IsEnabled,

@@ -1,8 +1,10 @@
-﻿namespace ColoursTest.Infrastructure.DTOs
+﻿using System;
+
+namespace ColoursTest.Infrastructure.DTOs
 {
     public class ColourDto
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         public string Name { get; set; }
 

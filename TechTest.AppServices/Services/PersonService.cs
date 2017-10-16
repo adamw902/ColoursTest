@@ -32,18 +32,19 @@ namespace ColoursTest.AppServices.Services
 
             if (request.FavouriteColours != null)
             {
-                colours = (await this.Colours.GetAll()).Where(c => request.FavouriteColours.Contains(c.ColourId)).ToList();
+                colours = (await this.Colours.GetAll()).Where(c => request.FavouriteColours.Contains(c.Name)).ToList();
             }
 
-            var person = new Person(0, request.FirstName, request.LastName, request.IsAuthorised ?? false,
-                                    request.IsValid ?? false, request.IsEnabled ?? false);
+            var person = new Person(Guid.NewGuid(), request.FirstName, request.LastName, 
+                                    request.IsAuthorised ?? false, request.IsValid ?? false, 
+                                    request.IsEnabled ?? false) {FavouriteColours = colours};
+            
+            await this.People.Insert(person);
 
-            person.FavouriteColours = colours;
-
-            return await this.People.Insert(person);
+            return person;
         }
 
-        public async Task<Person> UpdatePerson(int personId, CreateUpdatePerson request)
+        public async Task<Person> UpdatePerson(Guid personId, CreateUpdatePerson request)
         {
             if (request == null)
             {
@@ -58,7 +59,7 @@ namespace ColoursTest.AppServices.Services
             }
 
             var colours = request.FavouriteColours != null
-                            ? (await this.Colours.GetAll()).Where(c => request.FavouriteColours.Contains(c.ColourId))
+                            ? (await this.Colours.GetAll()).Where(c => request.FavouriteColours.Contains(c.Name))
                             : person.FavouriteColours;
             
             person.FirstName = !string.IsNullOrWhiteSpace(request.FirstName) ? request.FirstName : person.FirstName;
@@ -68,7 +69,9 @@ namespace ColoursTest.AppServices.Services
             person.IsEnabled = request.IsEnabled ?? person.IsEnabled;
             person.FavouriteColours = colours.ToList();
 
-            return await this.People.Update(person);
+            await this.People.Update(person);
+
+            return person;
         }
     }
 }

@@ -3,6 +3,6 @@
     public class FavouriteColour
     {
         public int PersonId { get; set; }
-        public int ColourId { get; set; }
+        public int Id { get; set; }
     }
 }

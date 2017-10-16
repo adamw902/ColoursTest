@@ -1,23 +1,19 @@
 ﻿using System;
-using System.Data.SqlClient;
+using MongoDB.Driver;
 
 namespace ColoursTest.Tests.Repositories
 {
-    public class BaseRepositoryTest : IDisposable
+    public class BaseRepositoryTest<T> : IDisposable where T : class
     {
-        protected BaseRepositoryTest(string databaseName)
+        protected BaseRepositoryTest()
         {
-            if (string.IsNullOrWhiteSpace(databaseName))
-            {
-                throw new ArgumentNullException(nameof(databaseName), "Please provide a database name");
-            }
-            this.DatabaseName = databaseName;
+            this.DatabaseName = $"{typeof(T).Name}DB";
             DatabaseSetup.Setup(this.DatabaseName);
         }
 
         private string DatabaseName { get; }
 
-        public SqlConnection Connection => new SqlConnection($"data source=localhost;initial catalog={this.DatabaseName};integrated security=true;");
+        public IMongoDatabase Database => new MongoClient("mongodb://localhost:27017").GetDatabase(this.DatabaseName);
 
         public void Dispose()
         {

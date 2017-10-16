@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ColoursTest.AppServices.Interfaces;
@@ -71,7 +72,7 @@ namespace ColoursTest.Tests.Controllers
         public async Task GetOne_RetrievesColour()
         {
             // Arange
-            var colourId = 1;
+            var id = Guid.NewGuid();
 
             var colourRepository = Substitute.For<IColourRepository>();
 
@@ -80,43 +81,43 @@ namespace ColoursTest.Tests.Controllers
             var coloursController = new ColoursController(colourRepository, colourService);
 
             // Act
-            await coloursController.Get(colourId);
+            await coloursController.Get(id);
 
             // Assert
-            await colourRepository.Received(1).GetById(colourId);
+            await colourRepository.Received(1).GetById(id);
         }
 
         [Fact]
-        public async Task GetOne_IncorrectColourId_ReturnsNotFound()
+        public async Task GetOne_IncorrectId_ReturnsNotFound()
         {
             // Arange
             var colourRepository = Substitute.For<IColourRepository>();
-            colourRepository.GetById(Arg.Any<int>()).Returns(Task.FromResult(null as Colour));
+            colourRepository.GetById(Arg.Any<Guid>()).Returns(Task.FromResult(null as Colour));
 
             var colourService = Substitute.For<IColourService>();
             
             var coloursController = new ColoursController(colourRepository, colourService);
 
             // Act
-            var result = await coloursController.Get(new int());
+            var result = await coloursController.Get(Guid.Empty);
 
             // Assert
             Assert.IsType<NotFoundResult>(result);
         }
 
         [Fact]
-        public async Task GetOne_ValidColourId_ReturnsOkWithColourDto()
+        public async Task GetOne_ValidId_ReturnsOkWithColourDto()
         {
             // Arange
             var colourRepository = Substitute.For<IColourRepository>();
-            colourRepository.GetById(Arg.Any<int>()).Returns(Task.FromResult(this.Colour));
+            colourRepository.GetById(Arg.Any<Guid>()).Returns(Task.FromResult(this.Colour));
 
             var colourService = Substitute.For<IColourService>();
 
             var coloursController = new ColoursController(colourRepository, colourService);
 
             // Act
-            var result = await coloursController.Get(new int());
+            var result = await coloursController.Get(Guid.NewGuid());
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -194,7 +195,7 @@ namespace ColoursTest.Tests.Controllers
         public async Task Put_CallsUpdateColour()
         {
             // Arange
-            var colourId = 1;
+            var id = Guid.NewGuid();
 
             var colourRepository = Substitute.For<IColourRepository>();
 
@@ -205,28 +206,27 @@ namespace ColoursTest.Tests.Controllers
             var comparer = Comparers.CreateUpdateColourComparer();
 
             // Act
-            await colourController.Put(colourId, this.CreateUpdateColour);
+            await colourController.Put(id, this.CreateUpdateColour);
 
             // Assert
             await colourService.Received(1)
-                    .UpdateColour(colourId,
+                    .UpdateColour(id,
                         Arg.Is<CreateUpdateColour>(x => comparer.Equals(x, this.CreateUpdateColour)));
         }
 
         [Fact]
-        public async Task Put_InvalidColourId_ReturnsNotFound()
+        public async Task Put_InvalidId_ReturnsNotFound()
         {
             // Arange
             var colourRepository = Substitute.For<IColourRepository>();
 
             var colourService = Substitute.For<IColourService>();
-            colourService.UpdateColour(Arg.Any<int>(), Arg.Any<CreateUpdateColour>())
-                         .Returns(Task.FromResult(null as Colour));
+            colourService.UpdateColour(Arg.Any<Guid>(), Arg.Any<CreateUpdateColour>()).Returns(Task.FromResult(null as Colour));
 
             var colourController = new ColoursController(colourRepository, colourService);
 
             // Act
-            var result = await colourController.Put(new int(), this.CreateUpdateColour);
+            var result = await colourController.Put(Guid.Empty, this.CreateUpdateColour);
 
             // Assert
             Assert.IsType<NotFoundResult>(result);
@@ -239,13 +239,12 @@ namespace ColoursTest.Tests.Controllers
             var colourRepository = Substitute.For<IColourRepository>();
 
             var colourService = Substitute.For<IColourService>();
-            colourService.UpdateColour(Arg.Any<int>(), Arg.Any<CreateUpdateColour>())
-                         .Returns(Task.FromResult(this.Colour));
+            colourService.UpdateColour(Arg.Any<Guid>(), Arg.Any<CreateUpdateColour>()).Returns(Task.FromResult(this.Colour));
 
             var colourController = new ColoursController(colourRepository, colourService);
 
             // Act
-            var result = await colourController.Put(new int(), this.CreateUpdateColour);
+            var result = await colourController.Put(this.Colour.Id, this.CreateUpdateColour);
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -257,13 +256,13 @@ namespace ColoursTest.Tests.Controllers
             Assert.Equal(this.ExpectedColourDto, colourDto, Comparers.ColourDtoComparer());
         }
 
-        private Colour Colour { get; } = new Colour(1, "blue", true);
+        private Colour Colour { get; } = new Colour(Guid.Parse("439FFD3C-B37D-40BB-9A9E-A48838C1AF23"), "Blue", true);
 
         private ColourDto ExpectedColourDto { get; } =
             new ColourDto
             {
-                Id = 1,
-                Name = "blue",
+                Id = Guid.Parse("439FFD3C-B37D-40BB-9A9E-A48838C1AF23"),
+                Name = "Blue",
                 IsEnabled = true
             };
 

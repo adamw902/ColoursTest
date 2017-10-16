@@ -53,12 +53,12 @@ namespace ColoursTest.Tests.Extensions
             Assert.Equal(expectedColoursDto, coloursDto, Comparers.ColourDtoComparer());
         }
 
-        private Colour Colour { get; } = new Colour(1, "Test", true);
+        private Colour Colour { get; } = new Colour(Guid.Parse("5B42FFD4-31E0-40C7-8CD3-442E485577AF"), "Test", true);
 
         private ColourDto ExpectedColourDto { get; } =
             new ColourDto
             {
-                Id = 1,
+                Id = Guid.Parse("5B42FFD4-31E0-40C7-8CD3-442E485577AF"),
                 Name = "Test",
                 IsEnabled = true
             };

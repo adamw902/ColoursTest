@@ -23,19 +23,21 @@ namespace ColoursTest.AppServices.Services
                 throw new ArgumentNullException(nameof(request), "Cannot create null colour.");
             }
 
-            var colour = new Colour(0, request.Name, request.IsEnabled ?? false);
+            var colour = new Colour(Guid.NewGuid(), request.Name, request.IsEnabled ?? false);
 
-            return await this.Colours.Insert(colour);
+            await this.Colours.Insert(colour);
+
+            return colour;
         }
 
-        public async Task<Colour> UpdateColour(int colourId, CreateUpdateColour request)
+        public async Task<Colour> UpdateColour(Guid id, CreateUpdateColour request)
         {
             if (request == null)
             {
                 throw new ArgumentNullException(nameof(request), "Cannot update null colour.");
             }
 
-            var colour = await this.Colours.GetById(colourId);
+            var colour = await this.Colours.GetById(id);
 
             if (colour == null)
             {
@@ -45,7 +47,9 @@ namespace ColoursTest.AppServices.Services
             colour.Name = !string.IsNullOrWhiteSpace(request.Name) ? request.Name : colour.Name;
             colour.IsEnabled = request.IsEnabled ?? colour.IsEnabled;
 
-            return await this.Colours.Update(colour);
+            await this.Colours.Update(colour);
+
+            return colour;
         }
     }
 }

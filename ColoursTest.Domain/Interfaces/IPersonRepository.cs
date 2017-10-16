@@ -1,6 +1,7 @@
-﻿using ColoursTest.Domain.Models;
+﻿using System;
+using ColoursTest.Domain.Models;
 
 namespace ColoursTest.Domain.Interfaces
 {
-    public interface IPersonRepository : IReadableRepository<Person, int>, IWriteableRepository<Person>{}
+    public interface IPersonRepository : IMongoBaseRepository<Person, Guid> { }
 }

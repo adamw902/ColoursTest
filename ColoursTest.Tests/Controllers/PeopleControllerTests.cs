@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ColoursTest.AppServices.Interfaces;
@@ -71,7 +72,7 @@ namespace ColoursTest.Tests.Controllers
         public async Task GetOne_RetrievesPerson()
         {
             // Arange
-            var PersonId = 1;
+            var personId = Guid.NewGuid();
 
             var personRepository = Substitute.For<IPersonRepository>();
 
@@ -80,10 +81,10 @@ namespace ColoursTest.Tests.Controllers
             var peopleController = new PeopleController(personRepository, personService);
 
             // Act
-            await peopleController.Get(PersonId);
+            await peopleController.Get(personId);
 
             // Assert
-            await personRepository.Received(1).GetById(PersonId);
+            await personRepository.Received(1).GetById(personId);
         }
 
         [Fact]
@@ -91,14 +92,14 @@ namespace ColoursTest.Tests.Controllers
         {
             // Arange
             var personRepository = Substitute.For<IPersonRepository>();
-            personRepository.GetById(Arg.Any<int>()).Returns(Task.FromResult(null as Person));
+            personRepository.GetById(Arg.Any<Guid>()).Returns(Task.FromResult(null as Person));
 
             var personService = Substitute.For<IPersonService>();
 
             var peopleController = new PeopleController(personRepository, personService);
 
             // Act
-            var result = await peopleController.Get(new int());
+            var result = await peopleController.Get(Guid.Empty);
 
             // Assert
             Assert.IsType<NotFoundResult>(result);
@@ -109,14 +110,14 @@ namespace ColoursTest.Tests.Controllers
         {
             // Arange
             var personRepository = Substitute.For<IPersonRepository>();
-            personRepository.GetById(Arg.Any<int>()).Returns(Task.FromResult(this.Person));
+            personRepository.GetById(Arg.Any<Guid>()).Returns(Task.FromResult(this.Person));
 
             var personService = Substitute.For<IPersonService>();
 
             var peopleController = new PeopleController(personRepository, personService);
 
             // Act
-            var result = await peopleController.Get(new int());
+            var result = await peopleController.Get(Guid.NewGuid());
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -195,7 +196,7 @@ namespace ColoursTest.Tests.Controllers
         public async Task Put_CallsUpdatePerson()
         {
             // Arange
-            var PersonId = 1;
+            var personId = Guid.NewGuid();
 
             var personRepository = Substitute.For<IPersonRepository>();
 
@@ -206,11 +207,11 @@ namespace ColoursTest.Tests.Controllers
             var comparer = Comparers.CreateUpdatePersonComparer();
 
             // Act
-            await peopleController.Put(PersonId, this.CreateUpdatePerson);
+            await peopleController.Put(personId, this.CreateUpdatePerson);
 
             // Assert
             await personService.Received(1)
-                    .UpdatePerson(PersonId,
+                    .UpdatePerson(personId,
                         Arg.Is<CreateUpdatePerson>(x => comparer.Equals(x, this.CreateUpdatePerson)));
         }
 
@@ -221,13 +222,13 @@ namespace ColoursTest.Tests.Controllers
             var personRepository = Substitute.For<IPersonRepository>();
 
             var personService = Substitute.For<IPersonService>();
-            personService.UpdatePerson(Arg.Any<int>(), Arg.Any<CreateUpdatePerson>())
+            personService.UpdatePerson(Arg.Any<Guid>(), Arg.Any<CreateUpdatePerson>())
                          .Returns(Task.FromResult(null as Person));
 
             var personController = new PeopleController(personRepository, personService);
 
             // Act
-            var result = await personController.Put(new int(), this.CreateUpdatePerson);
+            var result = await personController.Put(Guid.Empty, this.CreateUpdatePerson);
 
             // Assert
             Assert.IsType<NotFoundResult>(result);
@@ -240,13 +241,13 @@ namespace ColoursTest.Tests.Controllers
             var personRepository = Substitute.For<IPersonRepository>();
 
             var personService = Substitute.For<IPersonService>();
-            personService.UpdatePerson(Arg.Any<int>(), Arg.Any<CreateUpdatePerson>())
+            personService.UpdatePerson(Arg.Any<Guid>(), Arg.Any<CreateUpdatePerson>())
                 .Returns(Task.FromResult(this.Person));
 
             var personController = new PeopleController(personRepository, personService);
 
             // Act
-            var result = await personController.Put(new int(), this.CreateUpdatePerson);
+            var result = await personController.Put(Guid.NewGuid(), this.CreateUpdatePerson);
 
             // Assert
             Assert.IsType<OkObjectResult>(result);
@@ -259,19 +260,19 @@ namespace ColoursTest.Tests.Controllers
         }
 
         private Person Person { get; } = 
-            new Person(1, "Test", "Person", true, true, true)
+            new Person(Guid.Parse("51724787-A908-45CD-ABAA-EF4DA771F9EE"), "Test", "Person", true, true, true)
             {
                 FavouriteColours = new List<Colour>
                 {
-                    new Colour(1, "blue", true),
-                    new Colour(2, "red", true)
+                    new Colour(Guid.Parse("439FFD3C-B37D-40BB-9A9E-A48838C1AF23"), "Blue", true),
+                    new Colour(Guid.Parse("5B42FFD4-31E0-40C7-8CD3-442E485577AF"), "Red", true)
                 }
             };
 
         private PersonDto ExpectedPersonDto { get; } =
             new PersonDto
             {
-                Id = 1,
+                Id = Guid.Parse("51724787-A908-45CD-ABAA-EF4DA771F9EE"),
                 FirstName = "Test",
                 LastName = "Person",
                 IsEnabled = true,
@@ -281,14 +282,14 @@ namespace ColoursTest.Tests.Controllers
                 {
                     new ColourDto
                     {
-                        Id = 1,
-                        Name = "blue",
+                        Id = Guid.Parse("439FFD3C-B37D-40BB-9A9E-A48838C1AF23"),
+                        Name = "Blue",
                         IsEnabled = true
                     },
                     new ColourDto
                     {
-                        Id = 2,
-                        Name = "red",
+                        Id = Guid.Parse("5B42FFD4-31E0-40C7-8CD3-442E485577AF"),
+                        Name = "Red",
                         IsEnabled = true
                     }
                 }
@@ -302,7 +303,7 @@ namespace ColoursTest.Tests.Controllers
                 IsAuthorised = true,
                 IsValid = true,
                 IsEnabled = true,
-                FavouriteColours = new List<int> { 1, 2 }
+                FavouriteColours = new List<string> { "Blue", "Red" }
             };
     }
 }

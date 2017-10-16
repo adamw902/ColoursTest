@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using ColoursTest.AppServices.Interfaces;
 using ColoursTest.Domain.Interfaces;
 using ColoursTest.Infrastructure.DTOs;
@@ -32,7 +33,7 @@ namespace ColoursTest.Web.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(int id)
+        public async Task<IActionResult> Get(Guid id)
         {
             var person = await this.PersonRepository.GetById(id);
 
@@ -61,7 +62,7 @@ namespace ColoursTest.Web.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, [FromBody]CreateUpdatePerson updatePerson)
+        public async Task<IActionResult> Put(Guid id, [FromBody]CreateUpdatePerson updatePerson)
         {
             var person = await this.PersonService.UpdatePerson(id, updatePerson);
 

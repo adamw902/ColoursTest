@@ -3,6 +3,7 @@ using ColoursTest.AppServices.Interfaces;
 using ColoursTest.AppServices.Services;
 using ColoursTest.Infrastructure.Factories;
 using ColoursTest.Domain.Interfaces;
+using ColoursTest.Domain.Models;
 using ColoursTest.Infrastructure.Interfaces;
 using ColoursTest.Infrastructure.Middleware;
 using ColoursTest.Infrastructure.Repositories;
@@ -56,6 +57,7 @@ namespace ColoursTest.Web
             services.AddSingleton<IConfiguration>(Configuration);
             services.AddSingleton<ILoggerFactory, LoggerFactory>();
             services.AddSingleton<IDbConnectionFactory, SqlConnectionFactory>();
+            services.AddSingleton<IMongoConnectionFactory, MongoConnectionFactory>();
 
             services.AddTransient<IPersonRepository, PersonRepository>();
             services.AddTransient<IColourRepository, ColourRepository>();

@@ -1,54 +1,28 @@
-﻿using System.Data.SqlClient;
+﻿using System.Collections.Generic;
 using System.IO;
+using ColoursTest.Domain.Models;
+using MongoDB.Driver;
+using Newtonsoft.Json;
 
 namespace ColoursTest.Tests.Repositories
 {
     public static class DatabaseSetup
     {
-        private const string ConnectionString = "data source=localhost;initial catalog=master;integrated security=true;";
-
         public static void Setup(string databaseName)
         {
-            using (var connection = new SqlConnection(ConnectionString))
-            {
-                var createDatabase = File.ReadAllText("Repositories/DBScripts/CreateDatabase.sql"); //new FileInfo("Repositories/DBScripts/CreateDatabase.sql").OpenText().ReadToEnd();
-                var createTables = File.ReadAllText("Repositories/DBScripts/CreateTables.sql"); //new FileInfo("Repositories/DBScripts/CreateTables.sql").OpenText().ReadToEnd();
-                var insertMockData = File.ReadAllText("Repositories/DBScripts/InsertMockData.sql"); // new FileInfo("Repositories/DBScripts/InsertMockData.sql").OpenText().ReadToEnd();
+            var coloursData = JsonConvert.DeserializeObject<IEnumerable<Colour>>(File.ReadAllText("Repositories/DBScripts/InsertColoursData.txt"));
+            var peopleData = JsonConvert.DeserializeObject<IEnumerable<Person>>(File.ReadAllText("Repositories/DBScripts/InsertPeopleData.txt"));
 
-                var createDatabaseCommand = connection.CreateCommand();
-                createDatabase = createDatabase.Replace("@DatabaseName", $"'{databaseName}'");
-                createDatabaseCommand.CommandText = createDatabase.Replace("[@DBName]", $"[{databaseName}]");
+            var database = new MongoClient("mongodb://localhost:27017").GetDatabase(databaseName);
 
-                var createTablesCommand = connection.CreateCommand();
-                createTablesCommand.CommandText = createTables.Replace("@DBName", $"{databaseName}");
-
-                var insertMockDataCommand = connection.CreateCommand();
-                insertMockDataCommand.CommandText = insertMockData.Replace("@DBName", $"{databaseName}");
-
-                connection.Open();
-                createDatabaseCommand.ExecuteNonQuery();
-                createTablesCommand.ExecuteNonQuery();
-                insertMockDataCommand.ExecuteNonQuery();
-                connection.Close();
-            }
+            database.GetCollection<Colour>("colours").InsertMany(coloursData);
+            database.GetCollection<Person>("people").InsertMany(peopleData);
         }
 
         public static void TearDown(string databaseName)
         {
-            using (var connection = new SqlConnection(ConnectionString))
-            {
-                var dropDatabaseCommand = connection.CreateCommand();
-                dropDatabaseCommand.CommandText = 
-                    $@"IF EXISTS(SELECT name FROM dbo.sysdatabases WHERE name = '{databaseName}')
-                       BEGIN
-                           EXEC msdb.dbo.sp_delete_database_backuphistory @database_name = '{databaseName}'
-                           ALTER DATABASE [{databaseName}] SET SINGLE_USER WITH ROLLBACK IMMEDIATE
-                           DROP DATABASE[{databaseName}]
-                       END";
-
-                connection.Open();
-                dropDatabaseCommand.ExecuteNonQuery();
-            }
+            var client = new MongoClient("mongodb://localhost:27017");
+            client.DropDatabase(databaseName);
         }
     }
 }

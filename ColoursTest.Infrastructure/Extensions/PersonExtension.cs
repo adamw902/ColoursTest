@@ -17,7 +17,7 @@ namespace ColoursTest.Infrastructure.Extensions
 
             var personDto = new PersonDto
             {
-                Id = person.PersonId,
+                Id = person.Id,
                 FirstName = person.FirstName,
                 LastName = person.LastName,
                 IsEnabled = person.IsEnabled,

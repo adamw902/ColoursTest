@@ -29,13 +29,13 @@ namespace ColoursTest.Tests.Services
         {
             // Arange
             var expectedColour = this.ExpectedColour;
-            expectedColour.ColourId = new int();
+            expectedColour.Id = Guid.Empty;
 
             var colourRepository = Substitute.For<IColourRepository>();
 
             var colourService = new ColourService(colourRepository);
 
-            var comparer = Comparers.ColourComparer();
+            var comparer = Comparers.ColourWithNewIdComparer();
 
             // Act
             await colourService.CreateColour(this.CreateUpdateColour);
@@ -57,7 +57,7 @@ namespace ColoursTest.Tests.Services
             var colour = await colourService.CreateColour(this.CreateUpdateColour);
 
             // Assert
-            Assert.Equal(this.ExpectedColour, colour, Comparers.ColourComparer());
+            Assert.Equal(this.ExpectedColour, colour, Comparers.ColourWithNewIdComparer());
         }
 
         [Fact]
@@ -69,40 +69,38 @@ namespace ColoursTest.Tests.Services
             var colourService = new ColourService(colourRepository);
 
             // Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(() => colourService.UpdateColour(new int(), null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => colourService.UpdateColour(Guid.Empty, null));
         }
 
         [Fact]
         public async Task UpdateColour_ValidCreateUpdateColour_GetsExistingColour()
         {
             // Arange
-            var colourId = 1;
+            var id = Guid.NewGuid();
 
             var colourRepository = Substitute.For<IColourRepository>();
-            colourRepository.GetById(colourId).Returns(Task.FromResult(this.ExpectedColour));
+            colourRepository.GetById(Arg.Any<Guid>()).Returns(Task.FromResult(this.ExpectedColour));
 
             var colourService = new ColourService(colourRepository);
 
             // Act
-            await colourService.UpdateColour(colourId, this.CreateUpdateColour);
+            await colourService.UpdateColour(id, this.CreateUpdateColour);
 
             // Assert
-            await colourRepository.Received(1).GetById(colourId);
+            await colourRepository.Received(1).GetById(id);
         }
 
         [Fact]
         public async Task UpdateColour_InvalidColourId_ReturnsNull()
         {
             // Arange
-            var colourId = 9999999;
-
             var colourRepository = Substitute.For<IColourRepository>();
-            colourRepository.GetById(colourId).Returns(Task.FromResult(null as Colour));
+            colourRepository.GetById(Arg.Any<Guid>()).Returns(Task.FromResult(null as Colour));
 
             var colourService = new ColourService(colourRepository);
 
             // Act
-            var colour = await colourService.UpdateColour(colourId, this.CreateUpdateColour);
+            var colour = await colourService.UpdateColour(Guid.Empty, this.CreateUpdateColour);
 
             // Assert
             Assert.Null(colour);
@@ -113,34 +111,33 @@ namespace ColoursTest.Tests.Services
         {
             // Arange
             var colourRepository = Substitute.For<IColourRepository>();
-            colourRepository.GetById(Arg.Any<int>()).Returns(Task.FromResult(this.ExpectedColour));
+            colourRepository.GetById(Arg.Any<Guid>()).Returns(Task.FromResult(this.ExpectedColour));
 
             var colourService = new ColourService(colourRepository);
 
             var comparer = Comparers.ColourComparer();
 
             // Act
-            await colourService.UpdateColour(new int(), this.CreateUpdateColour);
+            await colourService.UpdateColour(Guid.NewGuid(), this.CreateUpdateColour);
 
             // Assert
-            await colourRepository.Update(Arg.Is<Colour>(x => comparer.Equals(x, this.ExpectedColour)));
+            await colourRepository.Received(1).Update(Arg.Is<Colour>(x => comparer.Equals(x, this.ExpectedColour)));
         }
 
         [Fact]
         public async Task UpdateColour_ValidCreateUpdateColour_ValuesAreUpdated()
         {
             // Arange
-            var colourId = 1;
-            var colourToUpdate = new Colour(1, "Old", false);
+            var id = this.ExpectedColour.Id;
+            var colourToUpdate = new Colour(id, "Old", false);
 
             var colourRepository = Substitute.For<IColourRepository>();
-            colourRepository.GetById(Arg.Any<int>()).Returns(Task.FromResult(colourToUpdate));
-            colourRepository.Update(Arg.Any<Colour>()).Returns(this.ExpectedColour);
+            colourRepository.GetById(Arg.Any<Guid>()).Returns(Task.FromResult(colourToUpdate));
 
             var colourService = new ColourService(colourRepository);
 
             // Act
-            var updatedColour = await colourService.UpdateColour(colourId, this.CreateUpdateColour);
+            var updatedColour = await colourService.UpdateColour(id, this.CreateUpdateColour);
 
             // Assert
             Assert.Equal(this.ExpectedColour, updatedColour, Comparers.ColourComparer());
@@ -153,6 +150,6 @@ namespace ColoursTest.Tests.Services
                 IsEnabled = true
             };
 
-        private Colour ExpectedColour { get; } = new Colour(1, "Test", true);
+        private Colour ExpectedColour { get; } = new Colour(Guid.Parse("5B42FFD4-31E0-40C7-8CD3-442E485577AF"), "Test", true);
     }
 }

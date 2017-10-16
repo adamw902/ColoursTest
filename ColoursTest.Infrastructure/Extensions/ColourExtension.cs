@@ -17,7 +17,7 @@ namespace ColoursTest.Infrastructure.Extensions
 
             var colourDto = new ColourDto
             {
-                Id = colour.ColourId,
+                Id = colour.Id,
                 Name = colour.Name,
                 IsEnabled = colour.IsEnabled
             };

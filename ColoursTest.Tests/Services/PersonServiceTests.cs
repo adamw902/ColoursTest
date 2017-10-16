@@ -27,11 +27,11 @@ namespace ColoursTest.Tests.Services
         }
 
         [Fact]
-        public async Task CreatePerson_ValidCreateUpdatePerson_PersonIsSaved()
+        public async Task CreatePerson_ValidCreateUpdatePerson_InsertIsCalled()
         {
             // Arange
             var expectedPerson = this.ExpectedPerson;
-            expectedPerson.PersonId = new int();
+            expectedPerson.Id = Guid.NewGuid();
 
             var personRepository = Substitute.For<IPersonRepository>();
 
@@ -40,10 +40,10 @@ namespace ColoursTest.Tests.Services
 
             var personService = new PersonService(personRepository, colourRepository);
 
-            var comparer = Comparers.PersonComparer();
+            var comparer = Comparers.PersonWithNewIdComparer();
 
             // Act
-            await personService.CreatePerson(this.CreateUpdatePerson);
+            var person = await personService.CreatePerson(this.CreateUpdatePerson);
 
             // Assert
             await personRepository.Received(1).Insert(Arg.Is<Person>(x => comparer.Equals(x, expectedPerson)));
@@ -101,7 +101,7 @@ namespace ColoursTest.Tests.Services
             var person = await personService.CreatePerson(this.CreateUpdatePerson);
             
             // Assert
-            Assert.Equal(this.ExpectedPerson, person, Comparers.PersonComparer());
+            Assert.Equal(this.ExpectedPerson, person, Comparers.PersonWithNewIdComparer());
         }
 
         [Fact]
@@ -114,17 +114,17 @@ namespace ColoursTest.Tests.Services
             var personService = new PersonService(personRepository, colourRepository);
 
             // Assert
-            await Assert.ThrowsAsync<ArgumentNullException>(() => personService.UpdatePerson(new int(), null));
+            await Assert.ThrowsAsync<ArgumentNullException>(() => personService.UpdatePerson(Guid.NewGuid(), null));
         }
 
         [Fact]
         public async Task UpdatePerson_ValidCreateUpdatePerson_GetsExistingPerson()
         {
             // Arange
-            var personId = 1;
+            var personId = Guid.NewGuid();
 
             var personRepository = Substitute.For<IPersonRepository>();
-            personRepository.GetById(personId).Returns(Task.FromResult(this.ExpectedPerson));
+            personRepository.GetById(Arg.Any<Guid>()).Returns(Task.FromResult(this.ExpectedPerson));
 
             var colourRepository = Substitute.For<IColourRepository>();
             colourRepository.GetAll().Returns(Task.FromResult(this.Colours));
@@ -142,10 +142,10 @@ namespace ColoursTest.Tests.Services
         public async Task UpdatePerson_InvalidPersonId_ReturnsNull()
         {
             // Arange
-            var personId = 99999999;
+            var personId = Guid.Empty;
 
             var personRepository = Substitute.For<IPersonRepository>();
-            personRepository.GetById(personId).Returns(Task.FromResult(null as Person));
+            personRepository.GetById(Arg.Any<Guid>()).Returns(Task.FromResult(null as Person));
 
             var colourRepository = Substitute.For<IColourRepository>();
             colourRepository.GetAll().Returns(Task.FromResult(this.Colours));
@@ -164,7 +164,7 @@ namespace ColoursTest.Tests.Services
         {
             // Arange
             var personRepository = Substitute.For<IPersonRepository>();
-            personRepository.GetById(Arg.Any<int>()).Returns(Task.FromResult(this.ExpectedPerson));
+            personRepository.GetById(Arg.Any<Guid>()).Returns(Task.FromResult(this.ExpectedPerson));
 
             var colourRepository = Substitute.For<IColourRepository>();
             colourRepository.GetAll().Returns(Task.FromResult(this.Colours));
@@ -174,7 +174,7 @@ namespace ColoursTest.Tests.Services
             var comparer = Comparers.PersonComparer();
 
             // Act
-            await personService.UpdatePerson(new int(), this.CreateUpdatePerson);
+            await personService.UpdatePerson(Guid.NewGuid(), this.CreateUpdatePerson);
 
             // Assert
             await personRepository.Received(1).Update(Arg.Is<Person>(x => comparer.Equals(x, this.ExpectedPerson)));
@@ -184,14 +184,14 @@ namespace ColoursTest.Tests.Services
         public async Task UpdatePerson_ValidCreateUpdatePerson_ValuesAreUpdated()
         {
             // Arange
-            var personId = 1;
-            var personToUpdate = new Person (1, "Old", "Name", false, false, false)
+            var personId = Guid.Parse("51724787-A908-45CD-ABAA-EF4DA771F9EE");
+            var personToUpdate = new Person (personId, "Old", "Name", false, false, false)
             {
                 FavouriteColours = new List<Colour>()
             };
 
             var personRepository = Substitute.For<IPersonRepository>();
-            personRepository.GetById(personId).Returns(Task.FromResult(personToUpdate));
+            personRepository.GetById(Arg.Any<Guid>()).Returns(Task.FromResult(personToUpdate));
             personRepository.Update(Arg.Any<Person>()).Returns(Task.FromResult(this.ExpectedPerson));
 
             var colourRepository = Substitute.For<IColourRepository>();
@@ -211,7 +211,7 @@ namespace ColoursTest.Tests.Services
         {
             // Arange
             var personRepository = Substitute.For<IPersonRepository>();
-            personRepository.GetById(Arg.Any<int>()).Returns(Task.FromResult(this.ExpectedPerson));
+            personRepository.GetById(Arg.Any<Guid>()).Returns(Task.FromResult(this.ExpectedPerson));
 
             var colourRepository = Substitute.For<IColourRepository>();
 
@@ -221,7 +221,7 @@ namespace ColoursTest.Tests.Services
             personWithoutColours.FavouriteColours = null;
 
             // Act
-            await personService.UpdatePerson(new int(), personWithoutColours);
+            await personService.UpdatePerson(Guid.NewGuid(), personWithoutColours);
 
             // Assert
             await colourRepository.DidNotReceive().GetAll();
@@ -232,7 +232,7 @@ namespace ColoursTest.Tests.Services
         {
             // Arange
             var personRepository = Substitute.For<IPersonRepository>();
-            personRepository.GetById(Arg.Any<int>()).Returns(Task.FromResult(this.ExpectedPerson));
+            personRepository.GetById(Arg.Any<Guid>()).Returns(Task.FromResult(this.ExpectedPerson));
 
             var colourRepository = Substitute.For<IColourRepository>();
             colourRepository.GetAll().Returns(Task.FromResult(this.Colours));
@@ -240,7 +240,7 @@ namespace ColoursTest.Tests.Services
             var personService = new PersonService(personRepository, colourRepository);
             
             // Act
-            await personService.UpdatePerson(new int(), this.CreateUpdatePerson);
+            await personService.UpdatePerson(Guid.NewGuid(), this.CreateUpdatePerson);
 
             // Assert
             await colourRepository.Received(1).GetAll();
@@ -254,25 +254,25 @@ namespace ColoursTest.Tests.Services
                 IsAuthorised = true,
                 IsEnabled = true,
                 IsValid = true,
-                FavouriteColours = new List<int> {1, 2}
+                FavouriteColours = new List<string> {"Blue", "Red"}
             };
 
         private Person ExpectedPerson { get; } =
-            new Person(1, "Test", "Person", true, true, true)
+            new Person(Guid.Parse("51724787-A908-45CD-ABAA-EF4DA771F9EE"), "Test", "Person", true, true, true)
             {
                 FavouriteColours = new List<Colour>
                 {
-                    new Colour(1, "blue", true),
-                    new Colour(2, "red", true)
+                    new Colour(Guid.Parse("439FFD3C-B37D-40BB-9A9E-A48838C1AF23"), "Blue", true),
+                    new Colour(Guid.Parse("5B42FFD4-31E0-40C7-8CD3-442E485577AF"), "Red", true)
                 }
             };
 
         private IEnumerable<Colour> Colours { get; } = 
             new List<Colour>
             {
-                new Colour(1, "blue", true),
-                new Colour(2, "red", true),
-                new Colour(3, "green", true)
+                new Colour(Guid.Parse("439FFD3C-B37D-40BB-9A9E-A48838C1AF23"), "Blue", true),
+                new Colour(Guid.Parse("5B42FFD4-31E0-40C7-8CD3-442E485577AF"), "Red", true),
+                new Colour(Guid.Parse("95D03170-349C-4003-B131-661526C8BD06"), "Green", true)
             };
     }
 }

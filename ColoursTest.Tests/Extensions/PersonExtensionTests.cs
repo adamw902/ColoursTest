@@ -55,7 +55,7 @@ namespace ColoursTest.Tests.Extensions
         }
 
         private Person Person { get; } =
-            new Person (1, "Test", "Person", true, true, true)
+            new Person (Guid.Parse("51724787-A908-45CD-ABAA-EF4DA771F9EE"), "Test", "Person", true, true, true)
             {
                 FavouriteColours = new List<Colour>()
             };
@@ -63,7 +63,7 @@ namespace ColoursTest.Tests.Extensions
         private PersonDto ExpectedPersonDto { get; }
             = new PersonDto
             {
-                Id = 1,
+                Id = Guid.Parse("51724787-A908-45CD-ABAA-EF4DA771F9EE"),
                 FirstName = "Test",
                 LastName = "Person",
                 IsAuthorised = true,
