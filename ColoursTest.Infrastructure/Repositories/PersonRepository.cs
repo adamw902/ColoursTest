@@ -31,22 +31,23 @@ namespace ColoursTest.Infrastructure.Repositories
                         INNER JOIN [Colours] C
                                 ON FC.ColourId = C.ColourId;";
 
-                var results = (await connection
-                        .QueryAsync<Person, Colour, Person>(selectPeopleAndColours,
-                            (person, colour) =>
-                            {
-                                person.FavouriteColours = person.FavouriteColours ?? new List<Colour>();
-                                person.FavouriteColours.Add(colour);
-                                return person;
-                            }, splitOn: "PersonId, ColourId"))
-                        .GroupBy(r => r.PersonId).Select(group =>
-                            {
-                                var groupedPerson = group.First();
-                                groupedPerson.FavouriteColours = group.Select(c => c.FavouriteColours.Single()).ToList();
-                                return groupedPerson;
-                            }
-                        );
-                return results;
+                var results = await connection.QueryAsync<Person, Colour, Person>(selectPeopleAndColours,
+                    (person, colour) =>
+                    {
+                        person.FavouriteColours = person.FavouriteColours ?? new List<Colour>();
+                        person.FavouriteColours.Add(colour);
+                        return person;
+                    }, splitOn: "PersonId, ColourId");
+
+                var groupedResults = results.GroupBy(r => r.PersonId)
+                    .Select(group =>
+                        {
+                            var groupedPerson = group.First();
+                            groupedPerson.FavouriteColours = group.Select(c => c.FavouriteColours.Single()).ToList();
+                            return groupedPerson;
+                        }
+                    );
+                return groupedResults;
             }
         }
 

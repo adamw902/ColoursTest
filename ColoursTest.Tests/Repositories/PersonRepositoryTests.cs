@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using ColoursTest.Domain.Models;
 using ColoursTest.Infrastructure.Interfaces;
@@ -112,9 +111,11 @@ namespace ColoursTest.Tests.Repositories
                         INNER JOIN [FavouriteColours] FC 
                                 ON C.ColourId = FC.ColourId 
                              WHERE FC.PersonId = {person.PersonId};";
+
                 persistedPerson = await connection.QuerySingleOrDefaultAsync<Person>(getPerson);
+
                 var colours = await connection.QueryAsync<Colour>(getFavouriteColours);
-                persistedPerson.FavouriteColours = colours.ToList();
+                persistedPerson.FavouriteColours = (IList<Colour>) colours;
             }
 
             // Assert
@@ -170,9 +171,11 @@ namespace ColoursTest.Tests.Repositories
                         INNER JOIN [FavouriteColours] FC 
                                 ON C.ColourId = FC.ColourId 
                              WHERE FC.PersonId = {personToUpdate.PersonId};";
+
                 person = await connection.QuerySingleOrDefaultAsync<Person>(getPerson);
+
                 var colours = await connection.QueryAsync<Colour>(getFavouriteColours);
-                person.FavouriteColours = colours.ToList();
+                person.FavouriteColours = (IList<Colour>) colours;
             }
 
             // Assert

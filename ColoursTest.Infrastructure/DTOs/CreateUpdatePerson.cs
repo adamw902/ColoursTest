@@ -12,8 +12,11 @@ namespace ColoursTest.Infrastructure.DTOs
         public string LastName { get; set; }
 
         public bool? IsAuthorised { get; set; }
+
         public bool? IsValid { get; set; }
+
         public bool? IsEnabled { get; set; }
+
         public List<int> FavouriteColours { get; set; }
     }
 }
