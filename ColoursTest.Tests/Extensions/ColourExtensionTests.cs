@@ -33,15 +33,11 @@ namespace ColoursTest.Tests.Extensions
             var colours = new List<Colour>
             {
                 this.Colour,
-                this.Colour,
-                this.Colour,
                 this.Colour
             };
 
             var expectedColoursDto = new List<ColourDto>
             {
-                this.ExpectedColourDto,
-                this.ExpectedColourDto,
                 this.ExpectedColourDto,
                 this.ExpectedColourDto
             };

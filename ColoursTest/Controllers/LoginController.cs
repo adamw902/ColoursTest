@@ -32,7 +32,7 @@ namespace ColoursTest.Web.Controllers
 
             var requestAt = DateTime.UtcNow;
             var expiresAt = requestAt + TokenAuthOption.ExpiresSpan;
-            var token = this.GenerateToken(request, expiresAt);
+            var token = GenerateToken(request, expiresAt);
 
             var loginSuccess = new LoginSuccess
             {
@@ -45,7 +45,7 @@ namespace ColoursTest.Web.Controllers
             return this.Ok(loginSuccess);
         }
 
-        private string GenerateToken(LoginRequest request, DateTime expires)
+        private static string GenerateToken(LoginRequest request, DateTime expires)
         {
             var handler = new JwtSecurityTokenHandler();
 

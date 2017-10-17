@@ -3,15 +3,11 @@ using System.Data.SqlClient;
 
 namespace ColoursTest.Tests.Repositories
 {
-    public class BaseRepositoryTest : IDisposable
+    public class BaseRepositoryTest<T> : IDisposable
     {
-        protected BaseRepositoryTest(string databaseName)
+        protected BaseRepositoryTest()
         {
-            if (string.IsNullOrWhiteSpace(databaseName))
-            {
-                throw new ArgumentNullException(nameof(databaseName), "Please provide a database name");
-            }
-            this.DatabaseName = databaseName;
+            this.DatabaseName = $"{typeof(T).Name}DB";
             DatabaseSetup.Setup(this.DatabaseName);
         }
 

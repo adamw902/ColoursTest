@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using ColoursTest.Domain.Models;
 using ColoursTest.Infrastructure.Interfaces;
@@ -11,10 +12,8 @@ using Xunit;
 
 namespace ColoursTest.Tests.Repositories
 {
-    public class PersonRepositoryTests : BaseRepositoryTest
+    public class PersonRepositoryTests : BaseRepositoryTest<PersonRepositoryTests>
     {
-        public PersonRepositoryTests() : base("PersonRepositoryTestsDB"){}
-
         [Fact]
         public async Task GetAll_ReturnsCollectionOfPeople()
         {
@@ -106,13 +105,20 @@ namespace ColoursTest.Tests.Repositories
             Person persistedPerson;
             using (var connection = connectionFactory.GetConnection())
             {
-                var getById = $"SELECT * FROM [People] WHERE PersonId = {person.PersonId}";
-                persistedPerson = await connection.QuerySingleOrDefaultAsync<Person>(getById);
+                var getPerson = $"SELECT * FROM [People] WHERE PersonId = {person.PersonId}";
+                var getFavouriteColours = $@"
+                            SELECT C.*
+                              FROM [Colours] C 
+                        INNER JOIN [FavouriteColours] FC 
+                                ON C.ColourId = FC.ColourId 
+                             WHERE FC.PersonId = {person.PersonId};";
+                persistedPerson = await connection.QuerySingleOrDefaultAsync<Person>(getPerson);
+                var colours = await connection.QueryAsync<Colour>(getFavouriteColours);
+                persistedPerson.FavouriteColours = colours.ToList();
             }
 
             // Assert
-            Assert.NotNull(persistedPerson);
-            Assert.Equal(this.PersonToInsert.FavouriteColours, persistedPerson.FavouriteColours, Comparers.ColoursComparer());
+            Assert.Equal(this.PersonToInsert, persistedPerson, Comparers.PersonComparer());
         }
 
         [Fact]
@@ -140,7 +146,7 @@ namespace ColoursTest.Tests.Repositories
         }
 
         [Fact]
-        public async Task Update_ValidPerson_UpdatesPersonSuccessfully()
+        public async Task Update_ValidPerson_UpdatesPersonAndColoursSuccessfully()
         {
             // Arange
             var connectionFactory = Substitute.For<IDbConnectionFactory>();
@@ -157,38 +163,20 @@ namespace ColoursTest.Tests.Repositories
             Person person;
             using (var connection = connectionFactory.GetConnection())
             {
-                var getById = $"SELECT * FROM [People] WHERE PersonId = {personToUpdate.PersonId}";
-                person = await connection.QuerySingleOrDefaultAsync<Person>(getById);
+                var getPerson = $"SELECT * FROM [People] WHERE PersonId = {personToUpdate.PersonId}";
+                var getFavouriteColours = $@"
+                            SELECT C.*
+                              FROM [Colours] C 
+                        INNER JOIN [FavouriteColours] FC 
+                                ON C.ColourId = FC.ColourId 
+                             WHERE FC.PersonId = {personToUpdate.PersonId};";
+                person = await connection.QuerySingleOrDefaultAsync<Person>(getPerson);
+                var colours = await connection.QueryAsync<Colour>(getFavouriteColours);
+                person.FavouriteColours = colours.ToList();
             }
 
             // Assert
             Assert.Equal(personToUpdate, person, Comparers.PersonComparer());
-        }
-
-        [Fact]
-        public async Task Update_ValidPerson_UpdatesFavouriteColoursSuccessfully()
-        {
-            // Arange
-            var connectionFactory = Substitute.For<IDbConnectionFactory>();
-            connectionFactory.GetConnection().Returns(x => this.Connection);
-
-            var personRepository = new PersonRepository(connectionFactory);
-
-            var personToUpdate = this.ExpectedPerson;
-            personToUpdate.FavouriteColours.Add(new Colour(3, "Blue", true));
-
-            // Act
-            await personRepository.Update(personToUpdate);
-
-            Person person;
-            using (var connection = connectionFactory.GetConnection())
-            {
-                var getById = $"SELECT * FROM [People] WHERE PersonId = {personToUpdate.PersonId}";
-                person = await connection.QuerySingleOrDefaultAsync<Person>(getById);
-            }
-
-            // Assert
-            Assert.Equal(personToUpdate.FavouriteColours, person.FavouriteColours, Comparers.ColoursComparer());
         }
 
         private Person PersonToInsert { get; } = 

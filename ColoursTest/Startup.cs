@@ -7,7 +7,6 @@ using ColoursTest.Infrastructure.Interfaces;
 using ColoursTest.Infrastructure.Middleware;
 using ColoursTest.Infrastructure.Repositories;
 using ColoursTest.Web.Common;
-using ColoursTest.Web.Filters;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -42,7 +41,6 @@ namespace ColoursTest.Web
             // Add framework services.
             services.AddMvc(options =>
             {
-                options.Filters.Add(typeof(CustomExceptionFilterAttribute));
                 var policy = new AuthorizationPolicyBuilder()
                                 .RequireAuthenticatedUser()
                                 .AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme)
@@ -51,8 +49,6 @@ namespace ColoursTest.Web
                 options.Filters.Add(new AuthorizeFilter(policy));
             });
 
-            services.AddScoped<CustomExceptionFilterAttribute>();
-            
             services.AddSingleton<IConfiguration>(Configuration);
             services.AddSingleton<ILoggerFactory, LoggerFactory>();
             services.AddSingleton<IDbConnectionFactory, SqlConnectionFactory>();

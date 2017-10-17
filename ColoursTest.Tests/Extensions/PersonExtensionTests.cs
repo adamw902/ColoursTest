@@ -34,15 +34,11 @@ namespace ColoursTest.Tests.Extensions
             var people = new List<Person>
             {
                 this.Person,
-                this.Person,
-                this.Person,
                 this.Person
             }.AsEnumerable();
 
             var expectedPeopleDto = new List<PersonDto>
             {
-                this.ExpectedPersonDto,
-                this.ExpectedPersonDto,
                 this.ExpectedPersonDto,
                 this.ExpectedPersonDto
             }.AsEnumerable();

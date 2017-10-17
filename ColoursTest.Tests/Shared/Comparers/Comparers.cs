@@ -30,13 +30,6 @@ namespace ColoursTest.Tests.Shared.Comparers
             );
         }
 
-        public static IEqualityComparer<IEnumerable<Colour>> ColoursComparer()
-        {
-            return new GenericComparer<IEnumerable<Colour>>(
-                (x, y) => x.SequenceEqual(y, ColourComparer())
-            );
-        }
-
         public static IEqualityComparer<Colour> ColourComparer()
         {
             return new GenericComparer<Colour>(

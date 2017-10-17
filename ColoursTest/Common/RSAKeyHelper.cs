@@ -2,7 +2,7 @@
 
 namespace ColoursTest.Web.Common
 {
-    public class RSAKeyHelper
+    public class RsaKeyHelper
     {
         public static RSAParameters GenerateKey()
         {

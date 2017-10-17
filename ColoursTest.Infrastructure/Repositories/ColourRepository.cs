@@ -29,8 +29,8 @@ namespace ColoursTest.Infrastructure.Repositories
         {
             using (var connection = this.DbConnectionFactory.GetConnection())
             {
-                var selectColour = "SELECT * FROM [Colours] WHERE ColourId = @ColourId;";
-                return await connection.QuerySingleOrDefaultAsync<Colour>(selectColour, new {ColourId = colourId});
+                var selectColour = $"SELECT * FROM [Colours] WHERE ColourId = {colourId};";
+                return await connection.QuerySingleOrDefaultAsync<Colour>(selectColour);
             }
         }
 
@@ -59,15 +59,14 @@ namespace ColoursTest.Infrastructure.Repositories
 
             using (var connection = this.DbConnectionFactory.GetConnection())
             {
-                var updateColour = @"
+                var updateColour = $@"
                         UPDATE [Colours]
                            SET Name = @Name, 
                                IsEnabled = @IsEnabled
-                         WHERE ColourId = @ColourId;";
+                         WHERE ColourId = {colour.ColourId};";
 
                 await connection.ExecuteAsync(updateColour, colour);
             }
-
             return colour;
         }
     }

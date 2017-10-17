@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using ColoursTest.Domain.Interfaces;
@@ -55,22 +54,22 @@ namespace ColoursTest.Infrastructure.Repositories
         {
             using (var connection = this.DbConnectionFactory.GetConnection())
             {
-                var selectPerson = "SELECT * FROM [People] WHERE PersonId = @PersonId;";
-                var person = (await connection.QueryAsync<Person>(selectPerson, new {PersonId = personId.ToString()})).SingleOrDefault();
+                var selectPerson = $"SELECT * FROM [People] WHERE PersonId = {personId};";
+                var person = (await connection.QueryAsync<Person>(selectPerson)).SingleOrDefault();
 
                 if (person == null)
                 {
                     return null;
                 }
 
-                var selectPersonColours = @"
+                var selectPersonColours = $@"
                             SELECT C.*
                               FROM [Colours] C 
                         INNER JOIN [FavouriteColours] FC 
                                 ON C.ColourId = FC.ColourId 
-                             WHERE FC.PersonId = @PersonId;";
+                             WHERE FC.PersonId = {personId};";
 
-                var colours = await connection.QueryAsync<Colour>(selectPersonColours, new {PersonId = personId.ToString()});
+                var colours = await connection.QueryAsync<Colour>(selectPersonColours);
                 person.FavouriteColours = (IList<Colour>) colours;
 
                 return person;
@@ -122,16 +121,16 @@ namespace ColoursTest.Infrastructure.Repositories
 
                 using (var transaction = connection.BeginTransaction())
                 {
-                    var updatePerson = @"
+                    var updatePerson = $@"
                             UPDATE [People] 
                                SET FirstName = @FirstName, 
                                    LastName = @LastName, 
                                    IsAuthorised = @IsAuthorised, 
                                    IsValid = @IsValid,
                                    IsEnabled = @IsEnabled
-                             WHERE PersonId = @PersonId;";
+                             WHERE PersonId = {person.PersonId};";
 
-                    var deletePersonColours = "DELETE FROM [FavouriteColours] WHERE PersonId = @PersonId;";
+                    var deletePersonColours = $"DELETE FROM [FavouriteColours] WHERE PersonId = {person.PersonId};";
 
                     var insertFavouriteColours =
                         person.FavouriteColours
@@ -144,17 +143,7 @@ namespace ColoursTest.Infrastructure.Repositories
 
                     transaction.Commit();
                 }
-
                 return person;
-            }
-        }
-
-        private async void InsertPersonColours(int personId, IEnumerable<Colour> colours, IDbConnection connection, IDbTransaction transaction)
-        {
-            var insertFavouriteColour = "INSERT INTO [FavouriteColours] (PersonId, ColourId) VALUES (@PersonId, @ColourId);";
-            foreach (var colour in colours)
-            {
-                await connection.ExecuteAsync(insertFavouriteColour, new { personId, colour.ColourId }, transaction);
             }
         }
     }

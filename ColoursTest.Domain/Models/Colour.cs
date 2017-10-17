@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ColoursTest.Domain.Models
+﻿namespace ColoursTest.Domain.Models
 {
     public class Colour
     {

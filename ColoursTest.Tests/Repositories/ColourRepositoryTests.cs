@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data.SqlClient;
 using System.Threading.Tasks;
 using NSubstitute;
 using Xunit;
@@ -11,10 +10,8 @@ using Dapper;
 
 namespace ColoursTest.Tests.Repositories
 {
-    public class ColourRepositoryTests : BaseRepositoryTest
+    public class ColourRepositoryTests : BaseRepositoryTest<ColourRepositoryTests>
     {
-        public ColourRepositoryTests() : base("ColourRepositoryTestsDB") {}
-
         [Fact]
         public async Task GetAll_ReturnsCollectionOfColours()
         {

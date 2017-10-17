@@ -11,9 +11,9 @@ namespace ColoursTest.Tests.Repositories
         {
             using (var connection = new SqlConnection(ConnectionString))
             {
-                var createDatabase = File.ReadAllText("Repositories/DBScripts/CreateDatabase.sql"); //new FileInfo("Repositories/DBScripts/CreateDatabase.sql").OpenText().ReadToEnd();
-                var createTables = File.ReadAllText("Repositories/DBScripts/CreateTables.sql"); //new FileInfo("Repositories/DBScripts/CreateTables.sql").OpenText().ReadToEnd();
-                var insertMockData = File.ReadAllText("Repositories/DBScripts/InsertMockData.sql"); // new FileInfo("Repositories/DBScripts/InsertMockData.sql").OpenText().ReadToEnd();
+                var createDatabase = File.ReadAllText("Repositories/DBScripts/CreateDatabase.sql");
+                var createTables = File.ReadAllText("Repositories/DBScripts/CreateTables.sql");
+                var insertMockData = File.ReadAllText("Repositories/DBScripts/InsertMockData.sql");
 
                 var createDatabaseCommand = connection.CreateCommand();
                 createDatabase = createDatabase.Replace("@DatabaseName", $"'{databaseName}'");

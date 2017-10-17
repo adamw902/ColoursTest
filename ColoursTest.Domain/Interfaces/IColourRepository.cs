@@ -2,5 +2,5 @@
 
 namespace ColoursTest.Domain.Interfaces
 {
-    public interface IColourRepository : IReadableRepository<Colour, int>, IWriteableRepository<Colour>{}
+    public interface IColourRepository : IBaseRepository<Colour, int>{}
 }
