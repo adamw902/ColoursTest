@@ -62,7 +62,7 @@ namespace ColoursTest.Tests.Controllers
             Assert.IsType<OkObjectResult>(result);
 
             var okObjectResult = (OkObjectResult) result;
-            Assert.IsType<List<ColourDto>>(okObjectResult.Value);
+            Assert.IsAssignableFrom<IEnumerable<ColourDto>>(okObjectResult.Value);
 
             var coloursDto = (IEnumerable<ColourDto>) okObjectResult.Value;
             Assert.Equal(expectedColoursDto, coloursDto, Comparers.ColourDtoComparer());

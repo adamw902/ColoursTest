@@ -31,7 +31,12 @@ namespace ColoursTest.Infrastructure.Extensions
 
         public static IEnumerable<PersonDto> ToPersonDto(this IEnumerable<Person> people)
         {
-            return people.Select(person => person.ToPersonDto()).ToList();
+            if (people == null)
+            {
+                throw new ArgumentNullException(nameof(people), "Cannot map null people.");
+            }
+
+            return people.Select(p => p.ToPersonDto());
         }
     }
 }

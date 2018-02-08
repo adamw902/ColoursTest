@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace ColoursTest.Infrastructure.DTOs
@@ -14,6 +15,6 @@ namespace ColoursTest.Infrastructure.DTOs
         public bool? IsAuthorised { get; set; }
         public bool? IsValid { get; set; }
         public bool? IsEnabled { get; set; }
-        public List<string> FavouriteColours { get; set; }
+        public IList<Guid> FavouriteColourIds { get; set; }
     }
 }

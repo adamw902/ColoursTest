@@ -6,17 +6,9 @@
     "IsAuthorised": true,
     "IsValid": true,
     "IsEnabled": true,
-    "FavouriteColours": [
-      {
-		"Id": "95D03170-349C-4003-B131-661526C8BD06",
-		"Name": "Green",
-		"IsEnabled": true
-	  },
-	  {
-		"Id": "439FFD3C-B37D-40BB-9A9E-A48838C1AF23",
-		"Name": "Blue",
-		"IsEnabled": true
-	  }
+    "FavouriteColourIds": [
+      "95D03170-349C-4003-B131-661526C8BD06",
+	  "439FFD3C-B37D-40BB-9A9E-A48838C1AF23"
     ]
   },
   {
@@ -26,22 +18,9 @@
     "IsAuthorised": false,
     "IsValid": false,
     "IsEnabled": false,
-    "FavouriteColours": [
-      {
-		"Id": "5B42FFD4-31E0-40C7-8CD3-442E485577AF",
-		"Name": "Red",
-		"IsEnabled": true
-	  },
-	  {
-		"Id": "95D03170-349C-4003-B131-661526C8BD06",
-		"Name": "Green",
-		"IsEnabled": true
-	  },
-	  {
-		"Id": "439FFD3C-B37D-40BB-9A9E-A48838C1AF23",
-		"Name": "Blue",
-		"IsEnabled": true
-	  }
+    "FavouriteColourIds": [
+      "95D03170-349C-4003-B131-661526C8BD06",
+	  "439FFD3C-B37D-40BB-9A9E-A48838C1AF23"
     ]
   },
   {
@@ -51,12 +30,9 @@
     "IsAuthorised": false,
     "IsValid": true,
     "IsEnabled": true,
-    "FavouriteColours": [
-	  {
-		"Id": "95D03170-349C-4003-B131-661526C8BD06",
-		"Name": "Green",
-		"IsEnabled": true
-	  }
+    "FavouriteColourIds": [
+	  "95D03170-349C-4003-B131-661526C8BD06",
+	  "439FFD3C-B37D-40BB-9A9E-A48838C1AF23"
     ]
   },
   {
@@ -66,22 +42,9 @@
     "IsAuthorised": false,
     "IsValid": false,
     "IsEnabled": false,
-    "FavouriteColours": [
-      {
-		"Id": "5B42FFD4-31E0-40C7-8CD3-442E485577AF",
-		"Name": "Red",
-		"IsEnabled": true
-	  },
-	  {
-		"Id": "95D03170-349C-4003-B131-661526C8BD06",
-		"Name": "Green",
-		"IsEnabled": true
-	  },
-	  {
-		"Id": "439FFD3C-B37D-40BB-9A9E-A48838C1AF23",
-		"Name": "Blue",
-		"IsEnabled": true
-	  }
+    "FavouriteColourIds": [
+      "95D03170-349C-4003-B131-661526C8BD06",
+	  "439FFD3C-B37D-40BB-9A9E-A48838C1AF23"
     ]
   },
   {
@@ -91,12 +54,9 @@
     "IsAuthorised": false,
     "IsValid": true,
     "IsEnabled": true,
-    "FavouriteColours": [
-      {
-		"Id": "95D03170-349C-4003-B131-661526C8BD06",
-		"Name": "Green",
-		"IsEnabled": true
-	  }
+    "FavouriteColourIds": [
+      "95D03170-349C-4003-B131-661526C8BD06",
+	  "439FFD3C-B37D-40BB-9A9E-A48838C1AF23"
     ]
   },
   {
@@ -106,12 +66,9 @@
     "IsAuthorised": false,
     "IsValid": false,
     "IsEnabled": false,
-    "FavouriteColours": [
-      {
-		"Id": "5B42FFD4-31E0-40C7-8CD3-442E485577AF",
-		"Name": "Red",
-		"IsEnabled": true
-	  }
+    "FavouriteColourIds": [
+      "95D03170-349C-4003-B131-661526C8BD06",
+	  "439FFD3C-B37D-40BB-9A9E-A48838C1AF23"
     ]
   },
   {
@@ -121,17 +78,9 @@
     "IsAuthorised": false,
     "IsValid": true,
     "IsEnabled": false,
-    "FavouriteColours": [
-      {
-		"Id": "95D03170-349C-4003-B131-661526C8BD06",
-		"Name": "Green",
-		"IsEnabled": true
-	  },
-	  {
-		"Id": "439FFD3C-B37D-40BB-9A9E-A48838C1AF23",
-		"Name": "Blue",
-		"IsEnabled": true
-	  }
+    "FavouriteColourIds": [
+      "95D03170-349C-4003-B131-661526C8BD06",
+	  "439FFD3C-B37D-40BB-9A9E-A48838C1AF23"
     ]
   },
   {
@@ -141,12 +90,9 @@
     "IsAuthorised": false,
     "IsValid": false,
     "IsEnabled": false,
-    "FavouriteColours": [
-      {
-		"Id": "95D03170-349C-4003-B131-661526C8BD06",
-		"Name": "Green",
-		"IsEnabled": true
-	  }
+    "FavouriteColourIds": [
+      "95D03170-349C-4003-B131-661526C8BD06",
+	  "439FFD3C-B37D-40BB-9A9E-A48838C1AF23"
     ]
   },
   {
@@ -156,12 +102,9 @@
     "IsAuthorised": false,
     "IsValid": true,
     "IsEnabled": true,
-    "FavouriteColours": [
-      {
-		"Id": "5B42FFD4-31E0-40C7-8CD3-442E485577AF",
-		"Name": "Red",
-		"IsEnabled": true
-	  }
+    "FavouriteColourIds": [
+      "95D03170-349C-4003-B131-661526C8BD06",
+	  "439FFD3C-B37D-40BB-9A9E-A48838C1AF23"
     ]
   },
   {
@@ -171,22 +114,9 @@
     "IsAuthorised": false,
     "IsValid": true,
     "IsEnabled": true,
-    "FavouriteColours": [
-      {
-		"Id": "5B42FFD4-31E0-40C7-8CD3-442E485577AF",
-		"Name": "Red",
-		"IsEnabled": true
-	  },
-	  {
-		"Id": "95D03170-349C-4003-B131-661526C8BD06",
-		"Name": "Green",
-		"IsEnabled": true
-	  },
-	  {
-		"Id": "439FFD3C-B37D-40BB-9A9E-A48838C1AF23",
-		"Name": "Blue",
-		"IsEnabled": true
-	  }
+    "FavouriteColourIds": [
+      "95D03170-349C-4003-B131-661526C8BD06",
+	  "439FFD3C-B37D-40BB-9A9E-A48838C1AF23"
     ]
   },
   {
@@ -196,12 +126,9 @@
     "IsAuthorised": true,
     "IsValid": true,
     "IsEnabled": false,
-    "FavouriteColours": [
-      {
-		"Id": "5B42FFD4-31E0-40C7-8CD3-442E485577AF",
-		"Name": "Red",
-		"IsEnabled": true
-	  }
+    "FavouriteColourIds": [
+      "95D03170-349C-4003-B131-661526C8BD06",
+	  "439FFD3C-B37D-40BB-9A9E-A48838C1AF23"
     ]
   }
 ]

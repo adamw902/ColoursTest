@@ -20,7 +20,8 @@ namespace ColoursTest.Infrastructure.Repositories
 
         public async Task<IEnumerable<Person>> GetAll()
         {
-            return await this.Database.GetCollection<Person>("people").Find(Builders<Person>.Filter.Empty).ToListAsync();
+            var people = await this.Database.GetCollection<Person>("people").Find(Builders<Person>.Filter.Empty).ToListAsync();
+            return people ?? new List<Person>();
         }
 
         public async Task<Person> GetById(Guid id)

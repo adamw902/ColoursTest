@@ -19,7 +19,7 @@ namespace ColoursTest.Infrastructure.Middleware
         {
             // no request stuff so do next.
             await this.Next.Invoke(context);
-
+            
             // response stuff
             switch (context.Response.StatusCode)
             {

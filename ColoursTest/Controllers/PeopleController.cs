@@ -26,16 +26,16 @@ namespace ColoursTest.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var people = await this.PersonRepository.GetAll();
+            var people = await this.PersonService.GetAllPeople();
             var peopleResult = people.ToPersonDto();
 
             return this.Ok(peopleResult);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}", Name="PersonGet")]
         public async Task<IActionResult> Get(Guid id)
         {
-            var person = await this.PersonRepository.GetById(id);
+            var person = await this.PersonService.GetPerson(id);
 
             if (person == null)
             {

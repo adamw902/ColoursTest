@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using ColoursTest.Infrastructure.Extensions;
 
 namespace ColoursTest.Infrastructure.DTOs
 {
@@ -11,6 +13,10 @@ namespace ColoursTest.Infrastructure.DTOs
 
         public string LastName { get; set; }
 
+        public string FullName => $"{this.FirstName} {this.LastName}";
+
+        public bool IsPalindrome => this.FullName.IsPalindrome();
+
         public bool IsAuthorised { get; set; }
 
         public bool IsValid { get; set; }
@@ -18,5 +24,7 @@ namespace ColoursTest.Infrastructure.DTOs
         public bool IsEnabled { get; set; }
 
         public IEnumerable<ColourDto> FavouriteColours { get; set; }
+
+        public string FavouriteColoursString => string.Join(", ", this.FavouriteColours.Select(c => c.Name));
     }
 }

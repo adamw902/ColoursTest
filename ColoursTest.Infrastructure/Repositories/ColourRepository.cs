@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using ColoursTest.Domain.Interfaces;
 using ColoursTest.Domain.Models;
@@ -20,13 +21,21 @@ namespace ColoursTest.Infrastructure.Repositories
 
         public async Task<IEnumerable<Colour>> GetAll()
         {
-            return await this.Database.GetCollection<Colour>("colours").Find(Builders<Colour>.Filter.Empty).ToListAsync();
+            var colours = await this.Database.GetCollection<Colour>("colours").Find(Builders<Colour>.Filter.Empty).ToListAsync();
+            return colours ?? new List<Colour>();
         }
 
         public Task<Colour> GetById(Guid id)
         {
             var filter = Builders<Colour>.Filter.Eq("Id", id);
             return this.Database.GetCollection<Colour>("colours").Find(filter).FirstOrDefaultAsync();
+        }
+
+        public async Task<IEnumerable<Colour>> GetByIds(IEnumerable<Guid> ids)
+        {
+            var filter = Builders<Colour>.Filter.Where(c => ids.Contains(c.Id));
+            var colours = await this.Database.GetCollection<Colour>("colours").Find(filter).ToListAsync();
+            return colours ?? new List<Colour>();
         }
 
         public async Task<Colour> Insert(Colour colour)

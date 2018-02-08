@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.AspNetCore.Mvc.Cors.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -41,6 +42,15 @@ namespace ColoursTest.Web
         public void ConfigureServices(IServiceCollection services)
         {
             // Add framework services.
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowCORS", builder =>
+                {
+                    builder.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin();
+                    //builder.WithOrigins("http://localhost:2112").WithMethods("GET, POST, PUT, OPTIONS").AllowAnyHeader();
+                });
+            });
+
             services.AddMvc(options =>
             {
                 options.Filters.Add(typeof(CustomExceptionFilterAttribute));
@@ -50,6 +60,8 @@ namespace ColoursTest.Web
                                 .Build();
 
                 options.Filters.Add(new AuthorizeFilter(policy));
+
+                options.Filters.Add(new CorsAuthorizationFilterFactory("AllowCORS"));
             });
 
             services.AddScoped<CustomExceptionFilterAttribute>();

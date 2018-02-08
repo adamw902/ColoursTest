@@ -6,18 +6,10 @@
     "IsAuthorised": true,
     "IsValid": true,
     "IsEnabled": true,
-    "FavouriteColours": [
-      {
-		"Id": "5B42FFD4-31E0-40C7-8CD3-442E485577AF",
-		"Name": "Red",
-		"IsEnabled": true
-	  },
-	  {
-		"Id": "95D03170-349C-4003-B131-661526C8BD06",
-		"Name": "Green",
-		"IsEnabled": true
-	  }
-    ]
+	"FavouriteColourIds": [
+		"5B42FFD4-31E0-40C7-8CD3-442E485577AF",
+		"95D03170-349C-4003-B131-661526C8BD06"
+	]
   },
   {
     "Id": "9906F779-9325-4745-B42D-27757F615B16",
@@ -26,18 +18,10 @@
     "IsAuthorised": true,
     "IsValid": true,
     "IsEnabled": true,
-    "FavouriteColours": [
-      {
-		"Id": "5B42FFD4-31E0-40C7-8CD3-442E485577AF",
-		"Name": "Red",
-		"IsEnabled": true
-	  },
-      {
-		"Id": "439FFD3C-B37D-40BB-9A9E-A48838C1AF23",
-		"Name": "Blue",
-		"IsEnabled": true
-	  }
-    ]
+	"FavouriteColourIds": [
+		"5B42FFD4-31E0-40C7-8CD3-442E485577AF",
+		"439FFD3C-B37D-40BB-9A9E-A48838C1AF23"
+	]
   },
   {
     "Id": "8DEE5940-0E11-4191-A5DE-5E591B82C1B1",
@@ -46,23 +30,11 @@
     "IsAuthorised": true,
     "IsValid": true,
     "IsEnabled": true,
-    "FavouriteColours": [
-      {
-		"Id": "5B42FFD4-31E0-40C7-8CD3-442E485577AF",
-		"Name": "Red",
-		"IsEnabled": true
-	  },
-	  {
-		"Id": "95D03170-349C-4003-B131-661526C8BD06",
-		"Name": "Green",
-		"IsEnabled": true
-	  },
-      {
-		"Id": "439FFD3C-B37D-40BB-9A9E-A48838C1AF23",
-		"Name": "Blue",
-		"IsEnabled": true
-	  }
-    ]
+	"FavouriteColourIds": [
+		"5B42FFD4-31E0-40C7-8CD3-442E485577AF",
+		"95D03170-349C-4003-B131-661526C8BD06",
+		"439FFD3C-B37D-40BB-9A9E-A48838C1AF23"
+	]
   },
   {
     "Id": "C2EB07C2-0840-4585-8A62-651C1C194E92",
@@ -71,18 +43,10 @@
     "IsAuthorised": true,
     "IsValid": true,
     "IsEnabled": true,
-    "FavouriteColours": [
-      {
-		"Id": "95D03170-349C-4003-B131-661526C8BD06",
-		"Name": "Green",
-		"IsEnabled": true
-	  },
-      {
-		"Id": "439FFD3C-B37D-40BB-9A9E-A48838C1AF23",
-		"Name": "Blue",
-		"IsEnabled": true
-	  }
-    ]
+	"FavouriteColourIds": [
+		"95D03170-349C-4003-B131-661526C8BD06",
+		"439FFD3C-B37D-40BB-9A9E-A48838C1AF23"
+	]
   },
   {
     "Id": "992E8C11-B086-4260-99D0-60622CB60EE1",
@@ -91,12 +55,8 @@
     "IsAuthorised": true,
     "IsValid": true,
     "IsEnabled": true,
-    "FavouriteColours": [
-      {
-		"Id": "439FFD3C-B37D-40BB-9A9E-A48838C1AF23",
-		"Name": "Blue",
-		"IsEnabled": true
-	  }
-    ]
+	"FavouriteColourIds": [
+		"439FFD3C-B37D-40BB-9A9E-A48838C1AF23"
+	]
   }
 ]

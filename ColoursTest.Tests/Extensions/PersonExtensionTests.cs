@@ -20,48 +20,8 @@ namespace ColoursTest.Tests.Extensions
         [Fact]
         public void ToPersonDtoSingle_ValidPerson_MapsToValidPersonDto()
         {
-            // Act
-            var personDto = this.Person.ToPersonDto();
-
-            // Assert
-            Assert.Equal(this.ExpectedPersonDto, personDto, Comparers.PersonDtoComparer());
-        }
-
-        [Fact]
-        public void ToPersonDtoCollection_ValidPersonCollection_MapsToValidPersonDtoCollection()
-        {
-            // Arange
-            var people = new List<Person>
-            {
-                this.Person,
-                this.Person,
-                this.Person,
-                this.Person
-            }.AsEnumerable();
-
-            var expectedPeopleDto = new List<PersonDto>
-            {
-                this.ExpectedPersonDto,
-                this.ExpectedPersonDto,
-                this.ExpectedPersonDto,
-                this.ExpectedPersonDto
-            }.AsEnumerable();
-
-            // Act
-            var peopleDto = people.ToPersonDto();
-
-            // Assert
-            Assert.Equal(expectedPeopleDto, peopleDto, Comparers.PersonDtoComparer());
-        }
-
-        private Person Person { get; } =
-            new Person (Guid.Parse("51724787-A908-45CD-ABAA-EF4DA771F9EE"), "Test", "Person", true, true, true)
-            {
-                FavouriteColours = new List<Colour>()
-            };
-
-        private PersonDto ExpectedPersonDto { get; }
-            = new PersonDto
+            // Arrange
+            var expectedPersonDto = new PersonDto
             {
                 Id = Guid.Parse("51724787-A908-45CD-ABAA-EF4DA771F9EE"),
                 FirstName = "Test",
@@ -71,5 +31,47 @@ namespace ColoursTest.Tests.Extensions
                 IsValid = true,
                 FavouriteColours = new List<ColourDto>()
             };
+
+            // Act
+            var personDto = this.Person.ToPersonDto();
+
+            // Assert
+            Assert.Equal(expectedPersonDto, personDto, Comparers.PersonDtoComparer());
+        }
+
+        [Fact]
+        public void ToPersonDtoCollection_ValidPersonCollection_MapsToValidPersonDtoCollection()
+        {
+            // Arange
+            var people = new List<Person>
+            {
+                this.Person
+            }.AsEnumerable();
+
+            var expectedPeopleDto = new List<PersonDto>
+            {
+                new PersonDto
+                {
+                    Id = Guid.Parse("51724787-A908-45CD-ABAA-EF4DA771F9EE"),
+                    FirstName = "Test",
+                    LastName = "Person",
+                    IsAuthorised = true,
+                    IsValid = true,
+                    IsEnabled = true,
+                    FavouriteColours = new List<ColourDto>()
+                }
+            }.AsEnumerable();
+
+            // Act
+            var peopleDto = people.ToPersonDto();
+
+            // Assert
+            Assert.Equal(expectedPeopleDto, peopleDto, Comparers.PersonDtoComparer());
+        }
+
+        private Person Person { get; } = new Person (Guid.Parse("51724787-A908-45CD-ABAA-EF4DA771F9EE"), "Test", "Person", true, true, true, new List<Guid>())
+        {
+            FavouriteColours = new List<Colour>()
+        };
     }
 }

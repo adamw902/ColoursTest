@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using ColoursTest.AppServices.Interfaces;
 using ColoursTest.Domain.Interfaces;
+using ColoursTest.Domain.Models;
 using ColoursTest.Infrastructure.DTOs;
 using ColoursTest.Infrastructure.Extensions;
 using Microsoft.AspNetCore.Mvc;

@@ -21,6 +21,25 @@ namespace ColoursTest.AppServices.Services
 
         private IColourRepository Colours { get; }
 
+        public async Task<IEnumerable<Person>> GetAllPeople()
+        {
+            var people = (await this.People.GetAll()).ToList();
+            foreach (var person in people)
+            {
+                person.FavouriteColours = (await this.Colours.GetByIds(person.FavouriteColourIds)).ToList();
+            }
+
+            return people;
+        }
+
+        public async Task<Person> GetPerson(Guid id)
+        {
+            var person = await this.People.GetById(id);
+            person.FavouriteColours = (await this.Colours.GetByIds(person.FavouriteColourIds)).ToList();
+
+            return person;
+        }
+
         public async Task<Person> CreatePerson(CreateUpdatePerson request)
         {
             if (request == null)
@@ -28,18 +47,19 @@ namespace ColoursTest.AppServices.Services
                 throw new ArgumentNullException(nameof(request), "Cannot create null person.");
             }
 
-            var colours = new List<Colour>();
-
-            if (request.FavouriteColours != null)
+            IEnumerable<Colour> colours = new List<Colour>();
+            if (request.FavouriteColourIds != null)
             {
-                colours = (await this.Colours.GetAll()).Where(c => request.FavouriteColours.Contains(c.Name)).ToList();
+                colours = await this.Colours.GetByIds(request.FavouriteColourIds);
             }
 
             var person = new Person(Guid.NewGuid(), request.FirstName, request.LastName, 
                                     request.IsAuthorised ?? false, request.IsValid ?? false, 
-                                    request.IsEnabled ?? false) {FavouriteColours = colours};
+                                    request.IsEnabled ?? false, colours.Select(c => c.Id).ToList());
             
             await this.People.Insert(person);
+
+            person.FavouriteColours = colours.ToList();
 
             return person;
         }
@@ -58,16 +78,19 @@ namespace ColoursTest.AppServices.Services
                 return null;
             }
 
-            var colours = request.FavouriteColours != null
-                            ? (await this.Colours.GetAll()).Where(c => request.FavouriteColours.Contains(c.Name))
-                            : person.FavouriteColours;
-            
+            var colourIds = person.FavouriteColourIds;
+            if (request.FavouriteColourIds != null)
+            {
+                person.FavouriteColours = (await this.Colours.GetByIds(request.FavouriteColourIds)).ToList();
+                colourIds = person.FavouriteColours.Select(c => c.Id).ToList();
+            }
+
             person.FirstName = !string.IsNullOrWhiteSpace(request.FirstName) ? request.FirstName : person.FirstName;
             person.LastName = !string.IsNullOrWhiteSpace(request.LastName) ? request.LastName : person.LastName;
             person.IsAuthorised = request.IsAuthorised ?? person.IsAuthorised;
             person.IsValid = request.IsValid ?? person.IsEnabled;
             person.IsEnabled = request.IsEnabled ?? person.IsEnabled;
-            person.FavouriteColours = colours.ToList();
+            person.FavouriteColourIds = colourIds;
 
             await this.People.Update(person);
 

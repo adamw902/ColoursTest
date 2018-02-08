@@ -142,23 +142,21 @@ namespace ColoursTest.Tests.Repositories
             Assert.Equal(personToUpdate, person, Comparers.PersonComparer());
         }
 
-        private Person PersonToInsert { get; } = 
-            new Person(Guid.Parse("4F4E0E5B-ECB7-44DE-B33C-0A65949C81E7"), "Inserted", "Person", true, true, true)
-            {
-                FavouriteColours = new List<Colour>
-                {
-                    new Colour(Guid.Parse("439FFD3C-B37D-40BB-9A9E-A48838C1AF23"), "Blue", true)
-                }
-            };
+        private Person PersonToInsert { get; } =
+            new Person(Guid.Parse("4F4E0E5B-ECB7-44DE-B33C-0A65949C81E7"), 
+                       "Inserted", "Person", true, true, true, 
+                       new List<Guid>
+                       {
+                           Guid.Parse("439FFD3C-B37D-40BB-9A9E-A48838C1AF23")
+                       });
 
         private Person ExpectedPerson { get; } =
-            new Person(Guid.Parse("51724787-A908-45CD-ABAA-EF4DA771F9EE"), "Test", "1", true, true, true)
-            {
-                FavouriteColours = new List<Colour>
-                {
-                    new Colour(Guid.Parse("5B42FFD4-31E0-40C7-8CD3-442E485577AF"), "Red", true),
-                    new Colour(Guid.Parse("95D03170-349C-4003-B131-661526C8BD06"), "Green", true)
-                }
-            };
+            new Person(Guid.Parse("51724787-A908-45CD-ABAA-EF4DA771F9EE"), 
+                       "Test", "1", true, true, true,
+                       new List<Guid>
+                       {
+                           Guid.Parse("5B42FFD4-31E0-40C7-8CD3-442E485577AF"),
+                           Guid.Parse("95D03170-349C-4003-B131-661526C8BD06")
+                       });
     }
 }

@@ -6,6 +6,7 @@ using ColoursTest.AppServices.Interfaces;
 using ColoursTest.Domain.Interfaces;
 using ColoursTest.Domain.Models;
 using ColoursTest.Infrastructure.DTOs;
+using ColoursTest.Infrastructure.Extensions;
 using ColoursTest.Tests.Shared.Comparers;
 using ColoursTest.Web.Controllers;
 using Microsoft.AspNetCore.Mvc;
@@ -29,7 +30,7 @@ namespace ColoursTest.Tests.Controllers
             personsController.Get().Wait();
 
             // Assert
-            personRepository.Received(1).GetAll();
+            personService.Received(1).GetAllPeople();
         }
 
         [Fact]
@@ -40,12 +41,6 @@ namespace ColoursTest.Tests.Controllers
             {
                 this.Person,
                 this.Person
-            }.AsEnumerable();
-
-            var expectedPeopleDto = new List<PersonDto>
-            {
-                this.ExpectedPersonDto,
-                this.ExpectedPersonDto
             }.AsEnumerable();
 
             var personRepository = Substitute.For<IPersonRepository>();
@@ -62,10 +57,7 @@ namespace ColoursTest.Tests.Controllers
             Assert.IsType<OkObjectResult>(result);
 
             var okObjectResult = (OkObjectResult)result;
-            Assert.IsType<List<PersonDto>>(okObjectResult.Value);
-
-            var peopleDto = (IEnumerable<PersonDto>)okObjectResult.Value;
-            Assert.Equal(expectedPeopleDto, peopleDto, Comparers.PersonDtoComparer());
+            Assert.IsAssignableFrom<IEnumerable<PersonDto>>(okObjectResult.Value);
         }
 
         [Fact]
@@ -84,7 +76,7 @@ namespace ColoursTest.Tests.Controllers
             await peopleController.Get(personId);
 
             // Assert
-            await personRepository.Received(1).GetById(personId);
+            await personService.Received(1).GetPerson(personId);
         }
 
         [Fact]
@@ -110,9 +102,9 @@ namespace ColoursTest.Tests.Controllers
         {
             // Arange
             var personRepository = Substitute.For<IPersonRepository>();
-            personRepository.GetById(Arg.Any<Guid>()).Returns(Task.FromResult(this.Person));
 
             var personService = Substitute.For<IPersonService>();
+            personService.GetPerson(Arg.Any<Guid>()).Returns(Task.FromResult(this.Person));
 
             var peopleController = new PeopleController(personRepository, personService);
 
@@ -124,9 +116,6 @@ namespace ColoursTest.Tests.Controllers
 
             var okObjectResult = (OkObjectResult)result;
             Assert.IsType<PersonDto>(okObjectResult.Value);
-
-            var personDto = (PersonDto)okObjectResult.Value;
-            Assert.Equal(this.ExpectedPersonDto, personDto, Comparers.PersonDtoComparer());
         }
 
         [Fact]
@@ -187,9 +176,6 @@ namespace ColoursTest.Tests.Controllers
 
             var okObjectResult = (OkObjectResult)result;
             Assert.IsType<PersonDto>(okObjectResult.Value);
-
-            var personDto = (PersonDto)okObjectResult.Value;
-            Assert.Equal(this.ExpectedPersonDto, personDto, Comparers.PersonDtoComparer());
         }
 
         [Fact]
@@ -254,13 +240,16 @@ namespace ColoursTest.Tests.Controllers
 
             var okObjectResult = (OkObjectResult)result;
             Assert.IsType<PersonDto>(okObjectResult.Value);
-
-            var personDto = (PersonDto)okObjectResult.Value;
-            Assert.Equal(this.ExpectedPersonDto, personDto, Comparers.PersonDtoComparer());
         }
 
-        private Person Person { get; } = 
-            new Person(Guid.Parse("51724787-A908-45CD-ABAA-EF4DA771F9EE"), "Test", "Person", true, true, true)
+        private Person Person { get; } =
+            new Person(Guid.Parse("51724787-A908-45CD-ABAA-EF4DA771F9EE"), 
+                       "Test", "Person", true, true, true,
+                       new List<Guid>
+                       {
+                           Guid.Parse("439FFD3C-B37D-40BB-9A9E-A48838C1AF23"),
+                           Guid.Parse("5B42FFD4-31E0-40C7-8CD3-442E485577AF")
+                       })
             {
                 FavouriteColours = new List<Colour>
                 {
@@ -303,7 +292,11 @@ namespace ColoursTest.Tests.Controllers
                 IsAuthorised = true,
                 IsValid = true,
                 IsEnabled = true,
-                FavouriteColours = new List<string> { "Blue", "Red" }
+                FavouriteColourIds = new List<Guid>
+                {
+                    Guid.Parse("439FFD3C-B37D-40BB-9A9E-A48838C1AF23"),
+                    Guid.Parse("5B42FFD4-31E0-40C7-8CD3-442E485577AF") 
+                }
             };
     }
 }

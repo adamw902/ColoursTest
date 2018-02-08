@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using ColoursTest.Domain.Models;
 using ColoursTest.Infrastructure.DTOs;
 
@@ -18,7 +17,7 @@ namespace ColoursTest.Tests.Shared.Comparers
                 (x, y) => x.IsEnabled == y.IsEnabled,
                 (x, y) => x.IsAuthorised == y.IsAuthorised,
                 (x, y) => x.IsValid == y.IsValid,
-                (x, y) => x.FavouriteColours.SequenceEqual(y.FavouriteColours, ColourDtoComparer())
+                (x, y) => x.FavouriteColours.SequenceEqual(y.FavouriteColours)
             );
         }
 
@@ -65,6 +64,7 @@ namespace ColoursTest.Tests.Shared.Comparers
                 (x, y) => x.IsEnabled == y.IsEnabled,
                 (x, y) => x.IsAuthorised == y.IsAuthorised,
                 (x, y) => x.IsValid == y.IsValid,
+                (x, y) => x.FavouriteColourIds.SequenceEqual(y.FavouriteColourIds),
                 (x, y) => x.FavouriteColours.SequenceEqual(y.FavouriteColours, ColourComparer())
             );
         }
@@ -98,7 +98,7 @@ namespace ColoursTest.Tests.Shared.Comparers
                 (x, y) => x.IsEnabled == y.IsEnabled,
                 (x, y) => x.IsAuthorised == y.IsAuthorised,
                 (x, y) => x.IsValid == y.IsValid,
-                (x, y) => x.FavouriteColours.SequenceEqual(y.FavouriteColours)
+                (x, y) => x.FavouriteColourIds.SequenceEqual(y.FavouriteColourIds)
             );
         }
     }

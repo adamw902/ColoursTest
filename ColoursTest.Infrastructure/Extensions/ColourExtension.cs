@@ -27,7 +27,11 @@ namespace ColoursTest.Infrastructure.Extensions
 
         public static IEnumerable<ColourDto> ToColourDto(this IEnumerable<Colour> colours)
         {
-            return colours.Select(colour => colour.ToColourDto()).ToList();
+            if (colours == null)
+            {
+                throw new ArgumentNullException(nameof(colours), "Cannot map null colours");
+            }
+            return colours.Select(colour => colour.ToColourDto());
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using ColoursTest.AppServices.Services;
 using ColoursTest.Domain.Interfaces;
@@ -30,23 +31,20 @@ namespace ColoursTest.Tests.Services
         public async Task CreatePerson_ValidCreateUpdatePerson_InsertIsCalled()
         {
             // Arange
-            var expectedPerson = this.ExpectedPerson;
-            expectedPerson.Id = Guid.NewGuid();
-
             var personRepository = Substitute.For<IPersonRepository>();
 
             var colourRepository = Substitute.For<IColourRepository>();
-            colourRepository.GetAll().Returns(Task.FromResult(this.Colours));
+            colourRepository.GetByIds(Arg.Any<List<Guid>>()).Returns(Task.FromResult(this.Colours));
 
             var personService = new PersonService(personRepository, colourRepository);
 
             var comparer = Comparers.PersonWithNewIdComparer();
 
             // Act
-            var person = await personService.CreatePerson(this.CreateUpdatePerson);
+            await personService.CreatePerson(this.CreateUpdatePerson);
 
             // Assert
-            await personRepository.Received(1).Insert(Arg.Is<Person>(x => comparer.Equals(x, expectedPerson)));
+            await personRepository.Received(1).Insert(Arg.Is<Person>(x => comparer.Equals(x, this.ExpectedPerson)));
         }
 
         [Fact]
@@ -59,7 +57,7 @@ namespace ColoursTest.Tests.Services
             var personService = new PersonService(personRepository, colourRepository);
 
             var personWithoutColours = this.CreateUpdatePerson;
-            personWithoutColours.FavouriteColours = null;
+            personWithoutColours.FavouriteColourIds = null;
 
             // Act
             await personService.CreatePerson(personWithoutColours);
@@ -82,7 +80,7 @@ namespace ColoursTest.Tests.Services
             await personService.CreatePerson(this.CreateUpdatePerson);
 
             // Assert
-            await colourRepository.Received(1).GetAll();
+            await colourRepository.Received(1).GetByIds(Arg.Is<List<Guid>>(x => x.SequenceEqual(this.CreateUpdatePerson.FavouriteColourIds)));
         }
 
         [Fact]
@@ -93,7 +91,7 @@ namespace ColoursTest.Tests.Services
             personRepository.Insert(Arg.Any<Person>()).Returns(Task.FromResult(this.ExpectedPerson));
 
             var colourRepository = Substitute.For<IColourRepository>();
-            colourRepository.GetAll().Returns(Task.FromResult(this.Colours));
+            colourRepository.GetByIds(Arg.Any<List<Guid>>()).Returns(Task.FromResult(this.Colours));
 
             var personService = new PersonService(personRepository, colourRepository);
 
@@ -167,7 +165,7 @@ namespace ColoursTest.Tests.Services
             personRepository.GetById(Arg.Any<Guid>()).Returns(Task.FromResult(this.ExpectedPerson));
 
             var colourRepository = Substitute.For<IColourRepository>();
-            colourRepository.GetAll().Returns(Task.FromResult(this.Colours));
+            colourRepository.GetByIds(Arg.Any<List<Guid>>()).Returns(Task.FromResult(this.Colours));
 
             var personService = new PersonService(personRepository, colourRepository);
             
@@ -185,17 +183,14 @@ namespace ColoursTest.Tests.Services
         {
             // Arange
             var personId = Guid.Parse("51724787-A908-45CD-ABAA-EF4DA771F9EE");
-            var personToUpdate = new Person (personId, "Old", "Name", false, false, false)
-            {
-                FavouriteColours = new List<Colour>()
-            };
+            var personToUpdate = new Person(personId, "Old", "Name", false, false, false, new List<Guid>());
 
             var personRepository = Substitute.For<IPersonRepository>();
             personRepository.GetById(Arg.Any<Guid>()).Returns(Task.FromResult(personToUpdate));
             personRepository.Update(Arg.Any<Person>()).Returns(Task.FromResult(this.ExpectedPerson));
 
             var colourRepository = Substitute.For<IColourRepository>();
-            colourRepository.GetAll().Returns(Task.FromResult(this.Colours));
+            colourRepository.GetByIds(Arg.Any<List<Guid>>()).Returns(Task.FromResult(this.Colours));
 
             var personService = new PersonService(personRepository, colourRepository);
 
@@ -218,7 +213,7 @@ namespace ColoursTest.Tests.Services
             var personService = new PersonService(personRepository, colourRepository);
 
             var personWithoutColours = this.CreateUpdatePerson;
-            personWithoutColours.FavouriteColours = null;
+            personWithoutColours.FavouriteColourIds = null;
 
             // Act
             await personService.UpdatePerson(Guid.NewGuid(), personWithoutColours);
@@ -235,7 +230,7 @@ namespace ColoursTest.Tests.Services
             personRepository.GetById(Arg.Any<Guid>()).Returns(Task.FromResult(this.ExpectedPerson));
 
             var colourRepository = Substitute.For<IColourRepository>();
-            colourRepository.GetAll().Returns(Task.FromResult(this.Colours));
+            colourRepository.GetByIds(Arg.Any<List<Guid>>()).Returns(Task.FromResult(this.Colours));
 
             var personService = new PersonService(personRepository, colourRepository);
             
@@ -243,7 +238,7 @@ namespace ColoursTest.Tests.Services
             await personService.UpdatePerson(Guid.NewGuid(), this.CreateUpdatePerson);
 
             // Assert
-            await colourRepository.Received(1).GetAll();
+            await colourRepository.Received(1).GetByIds(Arg.Is<List<Guid>>(x => x.SequenceEqual(this.CreateUpdatePerson.FavouriteColourIds)));
         }
 
         private CreateUpdatePerson CreateUpdatePerson { get; } =
@@ -254,25 +249,33 @@ namespace ColoursTest.Tests.Services
                 IsAuthorised = true,
                 IsEnabled = true,
                 IsValid = true,
-                FavouriteColours = new List<string> {"Blue", "Red"}
-            };
-
-        private Person ExpectedPerson { get; } =
-            new Person(Guid.Parse("51724787-A908-45CD-ABAA-EF4DA771F9EE"), "Test", "Person", true, true, true)
-            {
-                FavouriteColours = new List<Colour>
+                FavouriteColourIds = new List<Guid>
                 {
-                    new Colour(Guid.Parse("439FFD3C-B37D-40BB-9A9E-A48838C1AF23"), "Blue", true),
-                    new Colour(Guid.Parse("5B42FFD4-31E0-40C7-8CD3-442E485577AF"), "Red", true)
+                    Guid.Parse("95D03170-349C-4003-B131-661526C8BD06"),
+                    Guid.Parse("5B42FFD4-31E0-40C7-8CD3-442E485577AF") 
                 }
             };
 
+        private Person ExpectedPerson { get; } =
+            new Person(Guid.Parse("51724787-A908-45CD-ABAA-EF4DA771F9EE"), "Test", "Person", true, true, true,
+                       new List<Guid>
+                       {
+                           Guid.Parse("95D03170-349C-4003-B131-661526C8BD06"),
+                           Guid.Parse("5B42FFD4-31E0-40C7-8CD3-442E485577AF")
+                       })
+            {
+                FavouriteColours = new List<Colour>
+                {
+                    new Colour(Guid.Parse("95D03170-349C-4003-B131-661526C8BD06"), "Green", true),
+                    new Colour(Guid.Parse("5B42FFD4-31E0-40C7-8CD3-442E485577AF"), "Red", true)
+                }
+            };
+    
         private IEnumerable<Colour> Colours { get; } = 
             new List<Colour>
             {
-                new Colour(Guid.Parse("439FFD3C-B37D-40BB-9A9E-A48838C1AF23"), "Blue", true),
-                new Colour(Guid.Parse("5B42FFD4-31E0-40C7-8CD3-442E485577AF"), "Red", true),
-                new Colour(Guid.Parse("95D03170-349C-4003-B131-661526C8BD06"), "Green", true)
+                new Colour(Guid.Parse("95D03170-349C-4003-B131-661526C8BD06"), "Green", true),
+                new Colour(Guid.Parse("5B42FFD4-31E0-40C7-8CD3-442E485577AF"), "Red", true)
             };
     }
 }
